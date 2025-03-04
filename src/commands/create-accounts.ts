@@ -1,6 +1,5 @@
 import { GluegunCommand } from 'gluegun'
 import { randomBytes } from 'crypto'
-import axios from 'axios'
 import { Toolbox } from 'gluegun/build/types/domain/toolbox'
 
 let tools: Toolbox
@@ -27,72 +26,101 @@ class MegaAccount {
   }
 
   async register() {
-    tools.print.info(`Registering account with name: ${this.name}`)
-    const mailReq = await axios.get(
-      'https://api.guerrillamail.com/ajax.php?f=get_email_address&lang=en'
-    )
-    this.email = mailReq.data.email_addr
-    this.emailToken = mailReq.data.sid_token
+    return new Promise(async (resolve, reject) => {
+      const msg = tools.print.spin(
+        `Registering account with name: ${this.name}`
+      )
+      const mailReq = await tools.http
+        .create({ baseURL: 'https://api.guerrillamail.com' })
+        .get('/ajax.php?f=get_email_address&lang=en')
 
-    this.verifyCommand = await tools.system.run(
-      `megatools reg --scripted --register --email ${this.email} --name ${this.name} --password ${this.password}`
-    )
+      this.email = mailReq.data['email_addr']
+      this.emailToken = mailReq.data['sid_token']
+
+      this.verifyCommand = await tools.system.run(
+        `megatools reg --scripted --register --email ${this.email} --name ${this.name} --password ${this.password}`
+      )
+      msg.succeed(`Account registered with email: ${this.email}`)
+      resolve('done')
+    })
   }
 
   async verify() {
-    let mailId = null
-    const msg = tools.print.spin('Verifying email...')
-    for (let i = 0; i < 5; i++) {
-      if (mailId !== null) break
-      await new Promise((resolve) => setTimeout(resolve, 3000))
-      const checkMail = await axios.get(
-        `https://api.guerrillamail.com/ajax.php?f=get_email_list&offset=0&sid_token=${this.emailToken}`
-      )
+    return new Promise(async (resolve, reject) => {
+      let mailId = null
+      const msg = tools.print.spin('Verifying email...')
+      for (let i = 0; i < 5; i++) {
+        console.log('verify', i, this.email)
+        if (mailId !== null) break
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        const checkMail = await tools.http
+          .create({ baseURL: `https://api.guerrillamail.com` })
+          .get(
+            `/ajax.php?f=get_email_list&offset=0&sid_token=${this.emailToken}`
+          )
 
-      for (const email of checkMail.data.list) {
-        if (email.mail_subject.includes('MEGA')) {
-          mailId = email.mail_id
-          break
+        for (const email of checkMail.data['list']) {
+          if (email.mail_subject.includes('MEGA')) {
+            mailId = email.mail_id
+            break
+          }
         }
       }
-    }
 
-    if (mailId === null) {
-      msg.fail('Email verification failed: No verification email received.')
-      return
-    }
-    const viewMail = await axios.get(
-      `https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id=${mailId}&sid_token=${this.emailToken}`
-    )
-    const mailBody = viewMail.data.mail_body
-    const links = findUrl(mailBody)
+      if (mailId === null) {
+        msg.fail('Email verification failed: No verification email received.')
+        return
+      }
+      const viewMail = await tools.http
+        .create({ baseURL: `https://api.guerrillamail.com` })
+        .get(
+          `/ajax.php?f=fetch_email&email_id=${mailId}&sid_token=${this.emailToken}`
+        )
+      const mailBody = viewMail.data['mail_body']
+      const links = findUrl(mailBody)
 
-    this.verifyCommand = this.verifyCommand.replace('@LINK@', links[2])
+      this.verifyCommand = this.verifyCommand.replace('@LINK@', links[2])
 
-    tools.system
-      .exec(this.verifyCommand)
-      .then((result) => {
-        if (result.includes('registered successfully!')) {
-          msg.succeed(`Account created: ${this.email} - ${this.password}`)
-          //   tools.filesystem.append(
-          //     'generated/accounts.csv',
-          //     `${this.email},${this.password}\n`
-          //   )
-        }
-      })
-      .catch((e) => {
-        msg.fail('Email verification failed.')
-      })
+      tools.system
+        .exec(this.verifyCommand)
+        .then((result) => {
+          msg.succeed('Email verified.')
+
+          if (result.includes('registered successfully!')) {
+            tools.print.success(
+              `Account created: ${this.email} - ${this.password}`
+            )
+            tools.filesystem.append(
+              'generated/accounts.csv',
+              `${this.email},${this.password}\n`
+            )
+            resolve('done')
+          } else {
+            reject()
+          }
+        })
+        .catch((e) => {
+          msg.fail('Email verification failed.')
+          reject('failed')
+        })
+    })
   }
 }
 
 const newAccount = async () => {
-  const name = randomBytes(6).toString('hex')
-  const acc = new MegaAccount(name, PASSWORD)
+  return new Promise(async (resolve, reject) => {
+    const name = randomBytes(6).toString('hex')
+    const acc = new MegaAccount(name, PASSWORD)
 
-  await acc.register()
+    try {
+      await acc.register()
 
-  await acc.verify()
+      await acc.verify()
+      resolve('done')
+    } catch (e) {
+      reject('failed')
+    }
+  })
 }
 
 const command: GluegunCommand = {
@@ -116,8 +144,13 @@ const command: GluegunCommand = {
         tools.print.highlight(`Creating ${numAcc} mega accounts..`)
         tools.print.divider()
         for (let count = 0; count < numAcc; count++) {
-          newAccount()
+          try {
+            await newAccount()
+          } catch (e) {
+            tools.print.error('failed to create account-' + count)
+          }
         }
+        return
       })
       .catch((e) => {
         logger.fail('Megatools not installed.')

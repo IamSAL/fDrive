@@ -1,5 +1,4 @@
 import { GluegunCommand } from 'gluegun'
-import axios from 'axios'
 import { Toolbox } from 'gluegun/build/types/domain/toolbox'
 
 // Configuration
@@ -26,15 +25,20 @@ const generateRandomUsername = (): string => {
 // Service classes
 class GuerrillaMailService {
   // Stateless service methods that take required parameters
-
+  private tools: Toolbox
+  private api: any
+  constructor(toolbox: Toolbox) {
+    this.tools = toolbox
+    this.api = this.tools.http.create({
+      baseURL: 'https://api.guerrillamail.com',
+    })
+  }
   async getEmailAddress(): Promise<{ email: string; token: string }> {
-    const response = await axios.get(
-      'https://api.guerrillamail.com/ajax.php?f=get_email_address&lang=en'
-    )
+    const mailReq = await this.api.get('/ajax.php?f=get_email_address&lang=en')
 
     return {
-      email: response.data.email_addr,
-      token: response.data.sid_token,
+      email: mailReq.data['email_addr'],
+      token: mailReq.data['sid_token'],
     }
   }
 
@@ -53,8 +57,8 @@ class GuerrillaMailService {
         setTimeout(resolve, CONFIG.EMAIL_CHECK_INTERVAL_MS)
       )
 
-      const response = await axios.get(
-        `https://api.guerrillamail.com/ajax.php?f=get_email_list&offset=0&sid_token=${emailToken}`
+      const response = await this.api.get(
+        `/ajax.php?f=get_email_list&offset=0&sid_token=${emailToken}`
       )
 
       for (const email of response.data.list) {
@@ -72,8 +76,8 @@ class GuerrillaMailService {
     emailId: string,
     emailToken: string
   ): Promise<string | null> {
-    const response = await axios.get(
-      `https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id=${emailId}&sid_token=${emailToken}`
+    const response = await this.api.get(
+      `/ajax.php?f=fetch_email&email_id=${emailId}&sid_token=${emailToken}`
     )
 
     const mailBody = response.data.mail_body
@@ -91,7 +95,7 @@ class MegaAccountManager {
 
   constructor(toolbox: Toolbox) {
     this.tools = toolbox
-    this.mailService = new GuerrillaMailService()
+    this.mailService = new GuerrillaMailService(toolbox)
   }
 
   async createAccount(logger: any): Promise<boolean> {
