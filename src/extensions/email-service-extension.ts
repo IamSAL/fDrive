@@ -65,9 +65,7 @@ module.exports = (toolbox: GluegunToolbox) => {
 
       const mailBody = response.data['mail_body']
       const links = toolbox.account.findUrls(mailBody)
-
-      // The verification link is typically the third link in the email
-      return links.length >= 3 ? links[2] : null
+      return links.find((link) => link.includes('https://mega.nz/#confirm'))
     },
   }
 }

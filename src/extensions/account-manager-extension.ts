@@ -17,7 +17,7 @@ module.exports = (toolbox: GluegunToolbox) => {
   toolbox.account = {
     findUrls,
     generateRandomUsername,
-    async createAccount(email: string, logger: any): Promise<boolean> {
+    async createAccount(email: string, logger: any): Promise<string | boolean> {
       try {
         const username = generateRandomUsername()
         logger.text = `Creating new account: ${username}...`
@@ -28,7 +28,7 @@ module.exports = (toolbox: GluegunToolbox) => {
           `megatools reg --scripted --register --email ${email} --name ${username} --password ${CONFIG.PASSWORD}`
         )
 
-        return true
+        return registerCommand
       } catch (error) {
         logger.fail(`Account creation failed: ${error.message}`)
         return false
@@ -80,7 +80,7 @@ declare module 'gluegun' {
     account: {
       findUrls: (text: string) => string[]
       generateRandomUsername: () => string
-      createAccount: (email: string, logger: any) => Promise<boolean>
+      createAccount: (email: string, logger: any) => Promise<string | boolean>
       saveAccounts: (
         accounts: Array<{ email: string; password: string }>
       ) => Promise<void>

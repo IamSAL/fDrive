@@ -52,11 +52,11 @@ const command: GluegunCommand = {
           const { email, token } = await toolbox.email.getEmailAddress()
 
           // Step 2: Create account
-          const success = await toolbox.account.createAccount(
+          const verifyCommand = await toolbox.account.createAccount(
             email,
             accountLogger
           )
-          if (!success) return null
+          if (!verifyCommand) return null
 
           // Step 3: Get verification email
           const emailId = await toolbox.email.checkForMegaEmail(
@@ -81,13 +81,17 @@ const command: GluegunCommand = {
 
           // Step 5: Complete verification
           accountLogger.text = 'Completing verification...'
-          const verificationResult = await system.exec(
-            `megatools reg --scripted --verify --link ${verificationLink}`
-          )
+          const verify_ref = verifyCommand.replace('@LINK@', verificationLink)
+          const verificationResult = await system.exec(verifyCommand)
 
           if (verificationResult.includes('registered successfully!')) {
             accountLogger.succeed(`Account created successfully: ${email}`)
-            return { email, password: CONFIG.PASSWORD }
+            return {
+              email,
+              password: CONFIG.PASSWORD,
+              isVerified: true,
+              verify_ref,
+            }
           } else {
             accountLogger.fail('Verification failed')
             return null
@@ -99,12 +103,7 @@ const command: GluegunCommand = {
       })
 
       const results = await Promise.all(promises)
-      accounts.push(
-        ...results.filter(
-          (result): result is { email: string; password: string } =>
-            result !== null
-        )
-      )
+      accounts.push(...results.filter((result): any => result !== null))
       startIndex += batchSize
     }
 

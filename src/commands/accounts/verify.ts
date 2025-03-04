@@ -6,7 +6,7 @@ const command: GluegunCommand = {
   run: async (toolbox) => {
     const { print, prompt } = toolbox
 
-    const accounts = await toolbox.mega.listAccounts()
+    let accounts = await toolbox.mega.listAccounts()
     if (accounts.length === 0) {
       print.error('No accounts found to verify.')
       return
@@ -16,7 +16,9 @@ const command: GluegunCommand = {
       type: 'multiselect',
       name: 'selectedEmails',
       message: 'Select accounts to verify',
-      choices: accounts.map((acc) => acc.email),
+      choices: accounts
+        .filter((acc) => !acc.isVerified)
+        .map((acc) => acc.email),
     })
 
     if (!selectedEmails || selectedEmails.length === 0) {
@@ -28,23 +30,20 @@ const command: GluegunCommand = {
     print.info('----------------------------')
 
     for (const email of selectedEmails) {
-      const verifyLogger = print.spin(`Verifying ${email}...`)
-      const status = await toolbox.mega.getAccountStatus(email)
+      const account = accounts.find((acc) => acc.email === email)
 
-      switch (status) {
-        case 'active':
-          verifyLogger.succeed(`${email} is active and working properly`)
-          break
-        case 'inactive':
-          verifyLogger.warn(`${email} is inactive or has issues`)
-          break
-        case 'error':
-          verifyLogger.fail(`${email} encountered an error during verification`)
-          break
+      const verificationResult = await toolbox.system.exec(account.verify_ref)
+
+      if (verificationResult.includes('registered successfully!')) {
+        account.isVerified = true
+      } else {
+        account.isVerified = false
       }
+      accounts = accounts.map((acc) => (acc.email === email ? account : acc))
     }
+    await toolbox.account.saveAccounts(accounts)
 
-    print.info('\nVerification complete!')
+    toolbox.accounts.print.info('\nVerification complete!')
   },
 }
 
