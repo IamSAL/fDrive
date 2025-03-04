@@ -6,7 +6,7 @@ import { InstallMegatools } from './install-megatools'
 export async function showMenu(
   toolbox: GluegunMenuToolbox | Toolbox,
   parentCommands = '',
-  options = { byeMessage: 'Happy Hacking! 👋', showHelp: false }
+  options: any = { byeMessage: 'Happy Hacking! 👋', showHelp: false }
 ): Promise<void> {
   await toolbox.menu.showMenu(parentCommands, options)
 }

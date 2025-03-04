@@ -1,5 +1,5 @@
 import { GluegunCommand } from 'gluegun'
-import { showMenu } from '../helpers/misc'
+import { showMenu } from '../../helpers/misc'
 
 const command: GluegunCommand = {
   name: 'accounts',

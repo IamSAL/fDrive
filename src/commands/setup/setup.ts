@@ -1,7 +1,7 @@
 import { GluegunCommand } from 'gluegun'
 import * as path from 'path'
 import { promises as rclone } from 'rclone.js'
-import { createAccounts, inputStorageSize } from '../helpers/misc'
+import { createAccounts, inputStorageSize } from '../../helpers/misc'
 
 const command: GluegunCommand = {
   name: 'setup',
