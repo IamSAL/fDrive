@@ -30,6 +30,7 @@ module.exports = (toolbox: GluegunToolbox) => {
           return []
         }
         const accountsData = await filesystem.read(accountsPath)
+
         return JSON.parse(accountsData)
       } catch (error) {
         print.error(`Failed to read accounts: ${error.message}`)

@@ -12,14 +12,15 @@ const command: GluegunCommand = {
       return
     }
 
-    print.info('\nMEGA Accounts:')
-    print.info('-------------')
-
-    for (const account of accounts) {
-      print.info(`${account.email}   ${account.password}`)
-    }
-    print.info('-------------')
-    print.info(`\nTotal accounts: ${accounts.length}`)
+    print.info('\nMEGA Accounts:' + accounts.length)
+    print.divider()
+    print.table(
+      [
+        Object.keys(accounts[0] || {}),
+        ...accounts.map((acc) => Object.values(acc)),
+      ],
+      { format: 'lean' }
+    )
   },
 }
 

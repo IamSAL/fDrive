@@ -24,15 +24,27 @@
       text-align: center;
       margin-bottom: 30px;
     }
-    table {
+    .table-container {
       width: 100%;
-      border-collapse: collapse;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-bottom: 20px;
     }
+    table {
+      width: 100%;
+      min-width: 800px;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-bottom: 0;
+    }
     th, td {
-      padding: 12px;
+      padding: 12px 16px;
       text-align: left;
       border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
     }
     th {
       background-color: #f8f9fa;
@@ -51,74 +63,560 @@
 <body>
   <div class="container">
     <h1>Account List</h1>
-    <table>
+    <div class="table-container">
+      <table>
       <thead>
         <tr>
-          <th>Email</th>
-          <th>Password</th>
-          <th>Created At</th>
+          
+            
+            
+              <th>Email</th>
+            
+              <th>Usage</th>
+            
+              <th>Type</th>
+            
+              <th>SpaceUsed</th>
+            
+              <th>SpaceTotal</th>
+            
+              <th>DownloadBandwidthTotal</th>
+            
+              <th>DownloadBandwidthUsed</th>
+            
+              <th>SharedBandwidthUsed</th>
+            
+              <th>SharedBandwidthLimit</th>
+            
+              <th>Password</th>
+            
+              <th>Created at</th>
+            
+              <th>Last login</th>
+            
+          
         </tr>
       </thead>
       <tbody>
         
         <tr>
-          <td>tmsxuzal@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              tmsxuzal@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:03.965Z
+            </td>
+          
         </tr>
         
         <tr>
-          <td>ldjpfmvm@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              ldjpfmvm@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:04.886Z
+            </td>
+          
         </tr>
         
         <tr>
-          <td>midywdjb@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              midywdjb@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:05.190Z
+            </td>
+          
         </tr>
         
         <tr>
-          <td>supgnfkq@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              supgnfkq@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:06.235Z
+            </td>
+          
         </tr>
         
         <tr>
-          <td>azbiwxxk@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              azbiwxxk@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:06.554Z
+            </td>
+          
         </tr>
         
         <tr>
-          <td>nbsxtkzf@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              nbsxtkzf@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:07.024Z
+            </td>
+          
         </tr>
         
         <tr>
-          <td>gbulzggl@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              gbulzggl@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:07.413Z
+            </td>
+          
         </tr>
         
         <tr>
-          <td>jdbrwmxg@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              jdbrwmxg@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:07.937Z
+            </td>
+          
         </tr>
         
         <tr>
-          <td>bpzwmkgt@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              bpzwmkgt@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:08.566Z
+            </td>
+          
         </tr>
         
         <tr>
-          <td>taqeasvr@guerrillamailblock.com</td>
-          <td>iamsal275</td>
-          <td class="timestamp">3/4/2025, 11:34:13 AM</td>
+          
+            <td >
+              taqeasvr@guerrillamailblock.com
+            </td>
+          
+            <td >
+              0.00%
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              10737418240.00MB
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              0
+            </td>
+          
+            <td >
+              
+            </td>
+          
+            <td >
+              iamsal275
+            </td>
+          
+            <td class=&#34;timestamp&#34;>
+              3/4/2025, 1:46:09 PM
+            </td>
+          
+            <td >
+              2025-03-04T07:46:08.872Z
+            </td>
+          
         </tr>
         
       </tbody>
