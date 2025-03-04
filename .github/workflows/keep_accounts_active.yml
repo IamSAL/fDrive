@@ -8,6 +8,8 @@ on:
 jobs:
   keep_active:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -32,6 +34,9 @@ jobs:
 
       - name: Run keep-active command
         run: ./bin/free-drive accounts keep-active
+
+      - name: List accounts status
+        run: ./bin/free-drive accounts list
 
       - name: Commit changes
         run: |
