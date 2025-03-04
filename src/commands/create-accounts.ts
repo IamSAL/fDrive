@@ -1,160 +1,293 @@
 import { GluegunCommand } from 'gluegun'
-import { randomBytes } from 'crypto'
 import { Toolbox } from 'gluegun/build/types/domain/toolbox'
+import { InstallMegatools } from '../helpers/install-megatools'
 
-let tools: Toolbox
-
-const PASSWORD = 'iamsal275' // at least 8 chars
-
-const findUrl = (string: string): string[] => {
-  const regex =
-    /\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»""'']))/g
-  const url = string.match(regex)
-  return url ? url : []
+// Configuration
+const CONFIG = {
+  PASSWORD: 'PA$$WORD1235', // at least 8 chars
+  MAX_EMAIL_CHECK_ATTEMPTS: 5,
+  EMAIL_CHECK_INTERVAL_MS: 5000,
+  OUTPUT_FILE_PATH: 'generated/accounts.json',
+  CONCURRENT_LIMIT: 50,
 }
 
-class MegaAccount {
-  name: string
-  password: string
-  email: string
-  emailToken: string
-  verifyCommand: string
+// Utility functions
+const urlRegex =
+  /\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»""'']))/g
 
-  constructor(name: string, password: string) {
-    this.name = name
-    this.password = password
-  }
+const findUrls = (text: string): string[] => {
+  const matches = text.match(urlRegex)
+  return matches || []
+}
 
-  async register() {
-    return new Promise(async (resolve, reject) => {
-      const msg = tools.print.spin(
-        `Registering account with name: ${this.name}`
-      )
-      const mailReq = await tools.http
-        .create({ baseURL: 'https://api.guerrillamail.com' })
-        .get('/ajax.php?f=get_email_address&lang=en')
+const generateRandomUsername = (): string => {
+  return `user_${Math.random().toString(36).substring(2, 10)}`
+}
 
-      this.email = mailReq.data['email_addr']
-      this.emailToken = mailReq.data['sid_token']
-
-      this.verifyCommand = await tools.system.run(
-        `megatools reg --scripted --register --email ${this.email} --name ${this.name} --password ${this.password}`
-      )
-      msg.succeed(`Account registered with email: ${this.email}`)
-      resolve('done')
+// Service classes
+class GuerrillaMailService {
+  // Stateless service methods that take required parameters
+  private tools: Toolbox
+  private api: any
+  constructor(toolbox: Toolbox) {
+    this.tools = toolbox
+    this.api = this.tools.http.create({
+      baseURL: 'https://api.guerrillamail.com',
     })
   }
+  async getEmailAddress(): Promise<{ email: string; token: string }> {
+    const mailReq = await this.api.get('/ajax.php?f=get_email_address&lang=en')
 
-  async verify() {
-    return new Promise(async (resolve, reject) => {
-      let mailId = null
-      const msg = tools.print.spin('Verifying email...')
-      for (let i = 0; i < 5; i++) {
-        console.log('verify', i, this.email)
-        if (mailId !== null) break
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-        const checkMail = await tools.http
-          .create({ baseURL: `https://api.guerrillamail.com` })
-          .get(
-            `/ajax.php?f=get_email_list&offset=0&sid_token=${this.emailToken}`
-          )
+    return {
+      email: mailReq.data['email_addr'],
+      token: mailReq.data['sid_token'],
+    }
+  }
 
-        for (const email of checkMail.data['list']) {
-          if (email.mail_subject.includes('MEGA')) {
-            mailId = email.mail_id
-            break
-          }
+  async checkForMegaEmail(
+    emailToken: string,
+    logger: any
+  ): Promise<string | null> {
+    for (
+      let attempt = 1;
+      attempt <= CONFIG.MAX_EMAIL_CHECK_ATTEMPTS;
+      attempt++
+    ) {
+      logger.text = `Checking for verification email (attempt ${attempt}/${CONFIG.MAX_EMAIL_CHECK_ATTEMPTS})...`
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, CONFIG.EMAIL_CHECK_INTERVAL_MS)
+      )
+
+      const response = await this.api.get(
+        `/ajax.php?f=get_email_list&offset=0&sid_token=${emailToken}`
+      )
+
+      for (const email of response.data.list) {
+        if (email.mail_subject.includes('MEGA')) {
+          logger.text = `Found MEGA verification email!`
+          return email.mail_id
         }
       }
+    }
 
-      if (mailId === null) {
-        msg.fail('Email verification failed: No verification email received.')
-        return
-      }
-      const viewMail = await tools.http
-        .create({ baseURL: `https://api.guerrillamail.com` })
-        .get(
-          `/ajax.php?f=fetch_email&email_id=${mailId}&sid_token=${this.emailToken}`
-        )
-      const mailBody = viewMail.data['mail_body']
-      const links = findUrl(mailBody)
+    return null
+  }
 
-      this.verifyCommand = this.verifyCommand.replace('@LINK@', links[2])
+  async getVerificationLink(
+    emailId: string,
+    emailToken: string
+  ): Promise<string | null> {
+    const response = await this.api.get(
+      `/ajax.php?f=fetch_email&email_id=${emailId}&sid_token=${emailToken}`
+    )
 
-      tools.system
-        .exec(this.verifyCommand)
-        .then((result) => {
-          msg.succeed('Email verified.')
+    const mailBody = response.data.mail_body
+    const links = findUrls(mailBody)
 
-          if (result.includes('registered successfully!')) {
-            tools.print.success(
-              `Account created: ${this.email} - ${this.password}`
-            )
-            tools.filesystem.append(
-              'generated/accounts.csv',
-              `${this.email},${this.password}\n`
-            )
-            resolve('done')
-          } else {
-            reject()
-          }
-        })
-        .catch((e) => {
-          msg.fail('Email verification failed.')
-          reject('failed')
-        })
-    })
+    // The verification link is typically the third link in the email
+    return links.length >= 3 ? links[2] : null
   }
 }
 
-const newAccount = async () => {
-  return new Promise(async (resolve, reject) => {
-    const name = randomBytes(6).toString('hex')
-    const acc = new MegaAccount(name, PASSWORD)
+class MegaAccountManager {
+  private tools: Toolbox
+  private mailService: GuerrillaMailService
+  private accounts: string[] = []
 
-    try {
-      await acc.register()
+  constructor(toolbox: Toolbox) {
+    this.tools = toolbox
+    this.mailService = new GuerrillaMailService(toolbox)
+  }
 
-      await acc.verify()
-      resolve('done')
-    } catch (e) {
-      reject('failed')
+  private async processAccountBatch(
+    batch: number[],
+    totalAccounts: number,
+    startIndex: number
+  ): Promise<number> {
+    const promises = batch.map(async (i) => {
+      const accountLogger = this.tools.print.spin().stop()
+      try {
+        const success = await this.createAccount(accountLogger)
+        return success ? 1 : 0
+      } catch (error) {
+        accountLogger.fail(`Unexpected error: ${error.message}`)
+        return 0
+      }
+    })
+
+    const results = await Promise.all(promises)
+    return results.reduce((sum, val) => sum + val, 0)
+  }
+
+  async createAccountsInParallel(numAccounts: number): Promise<number> {
+    let successful = 0
+    let startIndex = 0
+
+    while (startIndex < numAccounts) {
+      const batchSize = Math.min(
+        CONFIG.CONCURRENT_LIMIT,
+        numAccounts - startIndex
+      )
+      const batch = Array.from({ length: batchSize }, (_, i) => startIndex + i)
+
+      successful += await this.processAccountBatch(
+        batch,
+        numAccounts,
+        startIndex
+      )
+      startIndex += batchSize
     }
-  })
+
+    return successful
+  }
+
+  async createAccount(logger: any): Promise<boolean> {
+    try {
+      const username = generateRandomUsername()
+      logger.text = `Creating new account: ${username}...`
+
+      // Step 1: Get email address with unique token for this account
+      logger.text = 'Getting temporary email addresses...'
+      const { email, token } = await this.mailService.getEmailAddress()
+
+      // Step 2: Register with MEGA
+      logger.info(`Registering: ${email}`)
+      const registerCommand = await this.tools.system.run(
+        `megatools reg --scripted --register --email ${email} --name ${username} --password ${CONFIG.PASSWORD}`
+      )
+
+      // Step 3: Wait for and process verification email using the account-specific token
+      const emailId = await this.mailService.checkForMegaEmail(token, logger)
+      if (!emailId) {
+        throw new Error('No verification email received')
+      }
+
+      // Step 4: Get verification link using the account-specific token
+      logger.text = 'Extracting verification link...'
+      const verificationLink = await this.mailService.getVerificationLink(
+        emailId,
+        token
+      )
+      if (!verificationLink) {
+        throw new Error('Could not find verification link in email')
+      }
+
+      // Step 5: Complete verification
+      logger.text = 'Completing verification...'
+      const verifyCommand = registerCommand.replace('@LINK@', verificationLink)
+      const verificationResult = await this.tools.system.exec(verifyCommand)
+
+      if (verificationResult.includes('registered successfully!')) {
+        this.accounts.push(`${email},${CONFIG.PASSWORD}`)
+        logger.succeed(`Account created successfully: ${email}`)
+        return true
+      } else {
+        throw new Error('Verification failed')
+      }
+    } catch (error) {
+      logger.fail(`Account creation failed: ${error.message}`)
+      return false
+    }
+  }
+
+  async saveAccounts(): Promise<void> {
+    if (this.accounts.length === 0) {
+      this.tools.print.info('No accounts to save')
+      return
+    }
+
+    const logger = this.tools.print.spin('Saving accounts to file...')
+    try {
+      // Ensure directory exists
+      await this.tools.filesystem.dirAsync('generated')
+
+      // Transform accounts data to JSON format
+      const accountsData = this.accounts.map((account) => {
+        const [email, password] = account.split(',')
+        return {
+          email,
+          password,
+          created_at: new Date().toISOString(),
+        }
+      })
+
+      // Save as JSON file
+      const jsonFilePath = CONFIG.OUTPUT_FILE_PATH
+      await this.tools.filesystem.writeAsync(
+        jsonFilePath,
+        JSON.stringify(accountsData, null, 2)
+      )
+
+      await this.tools.template.generate({
+        template: 'accounts.ts.ejs',
+        target: `generated/accounts.html`,
+        props: { accounts: accountsData },
+      })
+
+      logger.succeed(
+        `Saved ${this.accounts.length} accounts to ${jsonFilePath}`
+      )
+    } catch (error) {
+      logger.fail(`Failed to save accounts: ${error.message}`)
+    }
+  }
+
+  getCreatedAccountsCount(): number {
+    return this.accounts.length
+  }
 }
 
+// Main command
 const command: GluegunCommand = {
   name: 'create-accounts',
   alias: ['r'],
   run: async (toolbox) => {
-    tools = toolbox
     const { print, system, prompt } = toolbox
-    const logger = print.spin('Checking requirements...')
-    system
-      .exec('megatools reg --help')
-      .then(async (result) => {
-        logger.succeed()
-        const answer = await prompt.ask({
-          name: 'numAcc',
-          type: 'input',
-          message: 'How many accounts do you want to create?',
-        })
 
-        const numAcc = Number(answer.numAcc)
-        tools.print.highlight(`Creating ${numAcc} mega accounts..`)
-        tools.print.divider()
-        for (let count = 0; count < numAcc; count++) {
-          try {
-            await newAccount()
-          } catch (e) {
-            tools.print.error('failed to create account-' + count)
-          }
-        }
-        return
-      })
-      .catch((e) => {
-        logger.fail('Megatools not installed.')
-      })
+    // Check requirements
+    const requirementsLogger = print.spin('Checking requirements...')
+    try {
+      await system.exec('megatools reg --help')
+      requirementsLogger.succeed('')
+    } catch (error) {
+      requirementsLogger.fail(
+        'Megatools not installed. Please install it before running this command.'
+      )
+      await InstallMegatools(toolbox)
+    }
+
+    // Get number of accounts to create
+    const answer = await prompt.ask({
+      name: 'numAcc',
+      type: 'input',
+      message: 'How many accounts do you want to create?',
+    })
+
+    const numAccounts = parseInt(answer.numAcc, 10)
+    if (isNaN(numAccounts) || numAccounts <= 0) {
+      print.error('Please enter a valid number greater than 0')
+      return
+    }
+
+    // Create accounts
+    const accountManager = new MegaAccountManager(toolbox)
+    print.info(`Starting creation of ${numAccounts} MEGA accounts...`)
+
+    const successful = await accountManager.createAccountsInParallel(
+      numAccounts
+    )
+
+    // Save accounts
+    await accountManager.saveAccounts()
+
+    // Final summary
+
+    print.success(
+      `\nSuccessfully created: ${successful}/${numAccounts} accounts`
+    )
+    print.info(`Failed: ${numAccounts - successful} accounts`)
+    process.exit(0)
   },
 }
 
