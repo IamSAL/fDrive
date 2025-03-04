@@ -70,6 +70,7 @@ module.exports = (toolbox: GluegunToolbox) => {
   }
 }
 
+/** 
 declare module 'gluegun' {
   interface GluegunToolbox {
     email: {
@@ -86,3 +87,4 @@ declare module 'gluegun' {
     }
   }
 }
+*/

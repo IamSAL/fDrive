@@ -51,6 +51,7 @@ module.exports = (toolbox: GluegunToolbox) => {
   }
 }
 
+/** 
 declare module 'gluegun' {
   interface GluegunToolbox {
     mega: {
@@ -62,3 +63,4 @@ declare module 'gluegun' {
     }
   }
 }
+*/

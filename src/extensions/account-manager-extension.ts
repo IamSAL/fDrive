@@ -74,7 +74,7 @@ module.exports = (toolbox: GluegunToolbox) => {
     },
   }
 }
-
+/** 
 declare module 'gluegun' {
   interface GluegunToolbox {
     account: {
@@ -87,3 +87,4 @@ declare module 'gluegun' {
     }
   }
 }
+*/
