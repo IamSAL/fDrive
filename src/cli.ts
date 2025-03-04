@@ -9,6 +9,10 @@ async function run(argv) {
     .brand('free-drive')
     .src(__dirname)
     .plugins('./node_modules', { matching: 'free-drive-*', hidden: true })
+    .plugin(__dirname + '/../node_modules/@lenne.tech/gluegun-menu/dist', {
+      commandFilePattern: ['*.js'],
+      extensionFilePattern: ['*.js'],
+    })
     .help() // provides default for help, h, --help, -h
     .version() // provides default for version, v, --version, -v
     .create()

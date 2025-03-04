@@ -1,11 +1,12 @@
+import { GluegunMenuToolbox } from '@lenne.tech/gluegun-menu'
 import { GluegunCommand } from 'gluegun'
+import { showMenu } from '../helpers/misc'
 
 const command: GluegunCommand = {
   name: 'free-drive',
-  run: async (toolbox) => {
-    const { print } = toolbox
-
-    print.info('Welcome to your CLI')
+  hidden: true,
+  run: async (toolbox: GluegunMenuToolbox) => {
+    await showMenu(toolbox)
   },
 }
 
