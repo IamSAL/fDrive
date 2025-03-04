@@ -22,6 +22,6 @@
     "declaration": true,
     "declarationDir": "build/types"
   },
-  "include": ["src/**/*", "src/extensions/cli-extens, "example/RCloneScripts/cli-extension.ts"ion.ts"],
+  "include": ["src/**/*", "src/extensions/cli-extension.ts"],
   "exclude": ["node_modules"]
 }
