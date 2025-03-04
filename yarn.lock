@@ -547,6 +547,11 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@lenne.tech/gluegun-menu@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@lenne.tech/gluegun-menu/-/gluegun-menu-0.0.6.tgz#217612712a95bbf693c5b26eb15ca3e66e04d7c4"
+  integrity sha512-HnGMSdTmib16Ea2HPbeaXf3Qx8fwIo3wGw+Dcduy+M15rdQv3TSdV4j3E7xqMiUrge6uyTRn8LCFx/9una2MQw==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
