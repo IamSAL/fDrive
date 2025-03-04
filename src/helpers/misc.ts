@@ -1,5 +1,7 @@
 import { GluegunMenuToolbox } from '@lenne.tech/gluegun-menu'
 import { Toolbox } from 'gluegun/build/types/domain/toolbox'
+import * as path from 'path'
+import { promises as rclone } from 'rclone.js'
 
 import { InstallMegatools } from './install-megatools'
 
@@ -169,4 +171,23 @@ export async function createAccounts(
   )
   print.info(`Failed: ${numAccounts - accounts.length} accounts`)
   return accounts
+}
+
+export async function getRcloneConfig() {
+  const configDir = path.join(process.cwd(), 'generated')
+  const configPath = path.join(configDir, 'rclone.conf')
+  let rcloneConfig = {}
+  try {
+    const result = await rclone.config('dump', {
+      'max-depth': 1,
+      // Spawn options:
+      env: {
+        RCLONE_CONFIG: configPath,
+      },
+      shell: '/bin/sh',
+    })
+    rcloneConfig = JSON.parse(result.toString('utf-8'))
+  } catch (e) {}
+
+  return rcloneConfig
 }

@@ -1,7 +1,8 @@
 import { GluegunToolbox } from 'gluegun'
 import * as path from 'path'
-module.exports = (toolbox: GluegunToolbox) => {
-  toolbox.filesystem.exists('generated')
+import { getRcloneConfig } from '../helpers/misc'
+
+module.exports = async (toolbox: GluegunToolbox) => {
   toolbox.config = {
     ...toolbox.config,
     ...toolbox.config.loadConfig('free-drive', process.cwd()),
@@ -9,5 +10,6 @@ module.exports = (toolbox: GluegunToolbox) => {
       'custom',
       path.join(process.cwd(), 'generated')
     ),
+    rclone: await getRcloneConfig(),
   }
 }
