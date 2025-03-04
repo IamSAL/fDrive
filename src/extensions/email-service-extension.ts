@@ -1,5 +1,4 @@
 import { GluegunToolbox } from 'gluegun'
-import { CONFIG } from '../config/account-config'
 
 module.exports = (toolbox: GluegunToolbox) => {
   toolbox.email = {
@@ -26,13 +25,13 @@ module.exports = (toolbox: GluegunToolbox) => {
 
       for (
         let attempt = 1;
-        attempt <= CONFIG.MAX_EMAIL_CHECK_ATTEMPTS;
+        attempt <= toolbox.config.MAX_EMAIL_CHECK_ATTEMPTS;
         attempt++
       ) {
-        logger.text = `Checking for verification email (attempt ${attempt}/${CONFIG.MAX_EMAIL_CHECK_ATTEMPTS})...`
+        logger.text = `Checking for verification email (attempt ${attempt}/${toolbox.config.MAX_EMAIL_CHECK_ATTEMPTS})...`
 
         await new Promise((resolve) =>
-          setTimeout(resolve, CONFIG.EMAIL_CHECK_INTERVAL_MS)
+          setTimeout(resolve, toolbox.config.EMAIL_CHECK_INTERVAL_MS)
         )
 
         const response = await api.get(

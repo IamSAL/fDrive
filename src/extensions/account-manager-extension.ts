@@ -1,5 +1,4 @@
 import { GluegunToolbox } from 'gluegun'
-import { CONFIG } from '../config/account-config'
 
 const urlRegex =
   /\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»""'']))/g
@@ -25,7 +24,7 @@ module.exports = (toolbox: GluegunToolbox) => {
         // Register with MEGA
         logger.info(`Registering: ${email}`)
         const registerCommand = await toolbox.system.run(
-          `megatools reg --scripted --register --email ${email} --name ${username} --password ${CONFIG.PASSWORD}`
+          `megatools reg --scripted --register --email ${email} --name ${username} --password ${toolbox.config.PASSWORD}`
         )
 
         return registerCommand
@@ -55,7 +54,7 @@ module.exports = (toolbox: GluegunToolbox) => {
 
         // Save as JSON file
         await toolbox.filesystem.writeAsync(
-          CONFIG.OUTPUT_FILE_PATH,
+          toolbox.config.OUTPUT_FILE_PATH,
           JSON.stringify(accountsData, null, 2)
         )
 
@@ -66,7 +65,7 @@ module.exports = (toolbox: GluegunToolbox) => {
         })
 
         logger.succeed(
-          `Saved ${accounts.length} accounts to ${CONFIG.OUTPUT_FILE_PATH}`
+          `Saved ${accounts.length} accounts to ${toolbox.config.OUTPUT_FILE_PATH}`
         )
       } catch (error) {
         logger.fail(`Failed to save accounts: ${error.message}`)

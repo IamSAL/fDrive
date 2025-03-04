@@ -1,5 +1,5 @@
 import { GluegunToolbox } from 'gluegun'
-import { CONFIG } from '../config/account-config'
+
 import * as path from 'path'
 
 module.exports = (toolbox: GluegunToolbox) => {
@@ -8,7 +8,7 @@ module.exports = (toolbox: GluegunToolbox) => {
       const { system, print } = toolbox
       try {
         const result = await system.exec(
-          `megatools ls --username=${email} --password=${CONFIG.PASSWORD}`
+          `megatools ls --username=${email} --password=${toolbox.config.PASSWORD}`
         )
         return !result.includes('ERROR')
       } catch (error) {

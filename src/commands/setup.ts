@@ -1,17 +1,25 @@
 import { GluegunCommand } from 'gluegun'
 import * as path from 'path'
 import { promises as rclone } from 'rclone.js'
+import { createAccounts, inputStorageSize } from '../helpers/misc'
 
 const command: GluegunCommand = {
   name: 'setup',
   description: 'Generate rclone configuration from account data',
   run: async (toolbox) => {
-    const { print, filesystem } = toolbox
-
-    // Path to accounts data and config directory
+    const { print, filesystem, prompt, parameters, config } = toolbox
     const accountsPath = path.join(process.cwd(), 'generated', 'accounts.json')
     const configDir = path.join(process.cwd(), 'generated')
     const configPath = path.join(configDir, 'rclone.conf')
+    console.log(parameters.first)
+    if (parameters.first === 'view') {
+      print.info(config)
+      return
+    }
+    const numAccounts = await inputStorageSize(toolbox)
+    await createAccounts(toolbox, numAccounts)
+
+    // Path to accounts data and config directory
 
     // Check if accounts data exists
     if (!filesystem.exists(accountsPath)) {

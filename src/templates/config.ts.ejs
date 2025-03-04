@@ -1,0 +1,5 @@
+module.exports = {
+  <% for (const [key, value] of Object.entries(config)) { %>
+    <%= key %>: <%= JSON.stringify(value) %>,
+  <% } %>
+}
