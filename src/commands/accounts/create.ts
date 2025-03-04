@@ -20,17 +20,48 @@ const command: GluegunCommand = {
       await InstallMegatools(toolbox)
     }
 
+    let numAccounts = 1
     // Get number of accounts to create
-    const answer = await prompt.ask({
-      name: 'numAcc',
-      type: 'input',
-      message: 'How many accounts do you want to create?',
+    const sizes = await prompt.ask({
+      name: 'size',
+      type: 'select',
+      message:
+        'Select total storage size (1 MEGA account === 20GB, smaller size === faster performance)',
+      choices: ['264GB', '512GB', '1TB', '2TB', '4TB', 'custom'],
     })
-
-    const numAccounts = parseInt(answer.numAcc, 10)
-    if (isNaN(numAccounts) || numAccounts <= 0) {
-      print.error('Please enter a valid number greater than 0')
-      return
+    console.log(sizes.size)
+    switch (sizes.size) {
+      case '264GB':
+        numAccounts = Math.ceil(264 / 20)
+        break
+      case '512GB':
+        numAccounts = Math.ceil(512 / 20)
+        break
+      case '1TB':
+        numAccounts = Math.ceil(1024 / 20)
+        break
+      case '2TB':
+        numAccounts = Math.ceil(2048 / 20)
+        break
+      case '4TB':
+        numAccounts = Math.ceil(4096 / 20)
+        break
+      case 'custom':
+        const customSize = await prompt.ask({
+          name: 'customSize',
+          type: 'input',
+          message: 'Enter custom size in GB',
+          format(value) {
+            return `${value} GB`
+          },
+        })
+        const value = parseInt(customSize.customSize, 10)
+        if (isNaN(value) || value <= 0) {
+          print.error('Please enter a valid number greater than 0')
+          return
+        }
+        numAccounts = Math.ceil(value / 20)
+        break
     }
 
     print.info(`Starting creation of ${numAccounts} MEGA accounts...`)
