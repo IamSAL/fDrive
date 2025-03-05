@@ -140,7 +140,7 @@ export async function createAccounts(
         // Step 5: Complete verification
         accountLogger.text = 'Completing verification...'
         const verify_ref = verifyCommand.replace('@LINK@', verificationLink)
-        const verificationResult = await system.exec(verifyCommand)
+        const verificationResult = await system.exec(verify_ref)
 
         if (verificationResult.includes('registered successfully!')) {
           accountLogger.succeed(`Account created successfully: ${email}`)

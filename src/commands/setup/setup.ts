@@ -32,7 +32,8 @@ const command: GluegunCommand = {
 
     try {
       // Read accounts data
-      const accountsData = JSON.parse(filesystem.read(accountsPath) || '[]')
+      const accountsData =
+        JSON.parse(filesystem.read(accountsPath) || '[]') || []
 
       if (!Array.isArray(accountsData) || accountsData.length === 0) {
         print.error('No account data found in the file')
@@ -57,8 +58,10 @@ const command: GluegunCommand = {
       // Write config file
       filesystem.write(configPath, configContent)
       print.success(`Rclone configuration generated at ${configPath}`)
+      process.exit(0)
     } catch (error) {
       print.error(`Failed to generate rclone config: ${error.message}`)
+      process.exit(1)
     }
   },
 }
