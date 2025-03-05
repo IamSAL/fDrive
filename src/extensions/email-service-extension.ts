@@ -1,5 +1,4 @@
 import { GluegunToolbox } from 'gluegun'
-import { CONFIG } from '../config/account-config'
 
 module.exports = (toolbox: GluegunToolbox) => {
   toolbox.email = {
@@ -26,13 +25,13 @@ module.exports = (toolbox: GluegunToolbox) => {
 
       for (
         let attempt = 1;
-        attempt <= CONFIG.MAX_EMAIL_CHECK_ATTEMPTS;
+        attempt <= toolbox.config.MAX_EMAIL_CHECK_ATTEMPTS;
         attempt++
       ) {
-        logger.text = `Checking for verification email (attempt ${attempt}/${CONFIG.MAX_EMAIL_CHECK_ATTEMPTS})...`
+        logger.text = `Checking for verification email (attempt ${attempt}/${toolbox.config.MAX_EMAIL_CHECK_ATTEMPTS})...`
 
         await new Promise((resolve) =>
-          setTimeout(resolve, CONFIG.EMAIL_CHECK_INTERVAL_MS)
+          setTimeout(resolve, toolbox.config.EMAIL_CHECK_INTERVAL_MS)
         )
 
         const response = await api.get(
@@ -65,13 +64,12 @@ module.exports = (toolbox: GluegunToolbox) => {
 
       const mailBody = response.data['mail_body']
       const links = toolbox.account.findUrls(mailBody)
-
-      // The verification link is typically the third link in the email
-      return links.length >= 3 ? links[2] : null
+      return links.find((link) => link.includes('https://mega.nz/#confirm'))
     },
   }
 }
 
+/** 
 declare module 'gluegun' {
   interface GluegunToolbox {
     email: {
@@ -88,3 +86,4 @@ declare module 'gluegun' {
     }
   }
 }
+*/
