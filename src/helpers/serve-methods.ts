@@ -190,3 +190,26 @@ export const serveWebDAV = async (toolbox: Toolbox, config: ServeConfig) => {
 
   return runRcloneCommand(args.join(' '))
 }
+
+export const serveUI = async (toolbox: Toolbox, config: ServeConfig) => {
+  const {
+    port,
+    user,
+    pass,
+    remote = defaultConfig.remote,
+    path = defaultConfig.path,
+    addr = defaultConfig.addr,
+  } = config
+
+  if (!(await validateRcloneConfig(remote))) {
+    throw new Error(`Invalid rclone configuration for remote: ${remote}`)
+  }
+
+  const args = [`rcd`, '--rc-web-gui', `--rc-addr ${addr}:${port}`]
+
+  if (user && pass) {
+    args.push(`--rc-user ${user}`, `--rc-pass ${pass}`)
+  }
+
+  return runRcloneCommand(args.join(' '))
+}
