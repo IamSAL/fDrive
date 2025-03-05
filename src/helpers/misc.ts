@@ -23,7 +23,7 @@ export async function inputStorageSize(toolbox: Toolbox): Promise<number> {
     type: 'select',
     message:
       'Select storage size (1 account = 20GB, more accounts = slower performance):',
-    choices: ['264GB', '512GB', '1TB', '2TB', '4TB', 'custom'],
+    choices: ['264GB', '512GB', '1TB', '2TB', '4TB', 'custom', '[ back ]'],
   })
 
   switch (sizes.size) {
@@ -64,6 +64,9 @@ export async function inputStorageSize(toolbox: Toolbox): Promise<number> {
         return
       }
       numAccounts = Math.ceil(value / 20)
+      break
+    case '[ back ]':
+      await showMenu(toolbox)
       break
   }
   return numAccounts

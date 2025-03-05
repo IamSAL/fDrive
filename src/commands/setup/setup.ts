@@ -17,6 +17,9 @@ const command: GluegunCommand = {
       return
     }
     const numAccounts = await inputStorageSize(toolbox)
+    if (numAccounts == 0 || !numAccounts) {
+      return
+    }
     await createAccounts(toolbox, numAccounts)
 
     // Path to accounts data and config directory
