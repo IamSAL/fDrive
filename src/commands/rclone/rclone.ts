@@ -1,42 +1,41 @@
 import { GluegunCommand } from 'gluegun'
-import { promises as rclone } from 'rclone.js'
 import * as path from 'path'
+import { runRcloneCommand } from '../../helpers/rclone-runner'
 
 const command: GluegunCommand = {
   name: 'rclone',
-  description: '(Advanced) run custom rclone commands',
+  description: 'Run rclone commands with interactive support',
   run: async (toolbox) => {
+    const { print, parameters } = toolbox
     const configDir = path.join(process.cwd(), 'generated')
     const configPath = path.join(configDir, 'rclone.conf')
-    toolbox.print.muted(`Running command: rclone ${toolbox.parameters.string}`)
+
+    // If no parameters provided, show help
+    if (!parameters.string) {
+      parameters.string = 'help'
+    }
+
+    print.muted(`Running command: rclone ${parameters.string}`)
 
     try {
-      const result = await rclone(
-        ...toolbox.parameters.string.split(' '),
+      const result = await runRcloneCommand(parameters.string, {
+        configPath,
+        maxDepth: 1,
+      })
 
-        {
-          'max-depth': 1,
-          // Spawn options:
-          env: {
-            RCLONE_CONFIG: configPath,
-          },
-          shell: '/bin/sh',
-        }
-      )
-
-      // Convert Buffer to string and display
-      if (Buffer.isBuffer(result)) {
-        toolbox.print.info(result.toString('utf-8'))
-      } else {
-        toolbox.print.info(result)
-      }
+      // print.highlight('Output:')
+      // // Handle the output
+      // if (result) {
+      //   if (Buffer.isBuffer(result)) {
+      //     print.info(result.toString('utf-8'))
+      //   } else if (typeof result === 'string') {
+      //     print.info(result)
+      //   } else {
+      //     print.info(JSON.stringify(result, null, 2))
+      //   }
+      // }
     } catch (error) {
-      toolbox.print.error(`Command failed: `)
-      if (Buffer.isBuffer(error)) {
-        toolbox.print.info(error.toString('utf-8'))
-      } else {
-        toolbox.print.info(error)
-      }
+      process.exit(1)
     }
   },
 }
