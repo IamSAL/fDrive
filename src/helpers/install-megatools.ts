@@ -21,6 +21,7 @@ export async function InstallMegatools(toolbox: Toolbox) {
             ) {
               // Debian/Ubuntu based
               logger.text = 'Installing megatools using apt...'
+              await system.run(`sudo sed -i '/precise/d' /etc/apt/sources.list`)
               await system.run(
                 'sudo apt-get update && sudo apt-get install -y megatools'
               )
