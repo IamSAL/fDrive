@@ -71,14 +71,14 @@ async function handleExistingSetup(
   const { print, prompt } = toolbox
   const currentStorageGB = currentAccounts.length * 20
 
-  print.info(
+  print.muted(
     `Current storage capacity: ${currentStorageGB}GB (${currentAccounts.length} accounts)`
   )
 
   const storageAction = await prompt.ask({
     type: 'select',
     name: 'action',
-    message: 'What would you like to do with your storage?',
+    message: 'Your fDrive storage is already configured. Would you like to:',
     choices: ['Keep Current', 'Modify Storage', 'Start Fresh'],
   })
 
