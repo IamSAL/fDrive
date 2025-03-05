@@ -74,7 +74,8 @@ export async function inputStorageSize(toolbox: Toolbox): Promise<number> {
 
 export async function createAccounts(
   toolbox: Toolbox,
-  count: number
+  count: number,
+  action: 'add' | 'replace' = 'replace'
 ): Promise<any[]> {
   const { print, system, prompt } = toolbox
   // Check requirements
@@ -92,7 +93,11 @@ export async function createAccounts(
   const numAccounts = count
 
   print.info(`Starting creation of ${numAccounts} MEGA accounts...`)
-  const accounts: Array<{ email: string; password: string }> = []
+  let accounts: Array<{ email: string; password: string }> = []
+  if (action === 'add') {
+    const existingAccounts = await toolbox.mega.listAccounts()
+    accounts = [...existingAccounts]
+  }
   let startIndex = 0
 
   // Create accounts in batches
@@ -140,7 +145,7 @@ export async function createAccounts(
         // Step 5: Complete verification
         accountLogger.text = 'Completing verification...'
         const verify_ref = verifyCommand.replace('@LINK@', verificationLink)
-        const verificationResult = await system.exec(verifyCommand)
+        const verificationResult = await system.exec(verify_ref)
 
         if (verificationResult.includes('registered successfully!')) {
           accountLogger.succeed(`Account created successfully: ${email}`)
@@ -193,4 +198,23 @@ export async function getRcloneConfig() {
   } catch (e) {}
 
   return rcloneConfig
+}
+
+export async function inputUserPass(
+  toolbox: Toolbox
+): Promise<{ user: string; pass: string }> {
+  const { user } = await toolbox.prompt.ask([
+    { type: 'input', name: 'user', message: 'Enter username (optional):' },
+  ])
+
+  const { pass } = await toolbox.prompt.ask([
+    {
+      type: 'input',
+      name: 'pass',
+      message: 'Enter password (optional):',
+      skip: !user,
+    },
+  ])
+
+  return { user, pass }
 }

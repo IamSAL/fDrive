@@ -15,8 +15,6 @@ const command: GluegunCommand = {
       parameters.string = 'help'
     }
 
-    print.muted(`Running command: rclone ${parameters.string}`)
-
     try {
       const result = await runRcloneCommand(parameters.string, {
         configPath,
