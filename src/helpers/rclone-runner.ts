@@ -101,6 +101,7 @@ export async function runRcloneCommand(
     startTime,
   }
 
+  console.info('⌘ ' + command)
   // For interactive commands like ncdu, config, mount etc.
   if (SPAWN_ALL || ['ncdu', 'config', 'mount', 'serve'].includes(args[0])) {
     const spawnWithRetry = () =>

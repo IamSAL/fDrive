@@ -2,7 +2,7 @@ import { Toolbox } from 'gluegun/build/types/domain/toolbox'
 import { runRcloneCommand } from './rclone-runner'
 
 interface ServeConfig {
-  port: number
+  port?: number
   user?: string
   pass?: string
   addr?: string

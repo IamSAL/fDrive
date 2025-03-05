@@ -199,3 +199,22 @@ export async function getRcloneConfig() {
 
   return rcloneConfig
 }
+
+export async function inputUserPass(
+  toolbox: Toolbox
+): Promise<{ user: string; pass: string }> {
+  const { user } = await toolbox.prompt.ask([
+    { type: 'input', name: 'user', message: 'Enter username (optional):' },
+  ])
+
+  const { pass } = await toolbox.prompt.ask([
+    {
+      type: 'input',
+      name: 'pass',
+      message: 'Enter password (optional):',
+      skip: !user,
+    },
+  ])
+
+  return { user, pass }
+}
