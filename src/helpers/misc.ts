@@ -74,7 +74,8 @@ export async function inputStorageSize(toolbox: Toolbox): Promise<number> {
 
 export async function createAccounts(
   toolbox: Toolbox,
-  count: number
+  count: number,
+  action: 'add' | 'replace' = 'replace'
 ): Promise<any[]> {
   const { print, system, prompt } = toolbox
   // Check requirements
@@ -92,7 +93,11 @@ export async function createAccounts(
   const numAccounts = count
 
   print.info(`Starting creation of ${numAccounts} MEGA accounts...`)
-  const accounts: Array<{ email: string; password: string }> = []
+  let accounts: Array<{ email: string; password: string }> = []
+  if (action === 'add') {
+    const existingAccounts = await toolbox.mega.listAccounts()
+    accounts = [...existingAccounts]
+  }
   let startIndex = 0
 
   // Create accounts in batches
