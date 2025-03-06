@@ -3,6 +3,7 @@ import * as path from 'path'
 import { getRcloneConfig } from '../helpers/misc'
 
 module.exports = async (toolbox: GluegunToolbox) => {
+  const rcloneConf = await getRcloneConfig()
   toolbox.config = {
     ...toolbox.config,
     ...toolbox.config.loadConfig('free-drive', process.cwd()),
@@ -10,6 +11,7 @@ module.exports = async (toolbox: GluegunToolbox) => {
       'custom',
       path.join(process.cwd(), 'generated')
     ),
-    rclone: await getRcloneConfig(),
+    rclone: rcloneConf,
+    isSetup: Object.keys(rcloneConf).length > 0,
   }
 }
