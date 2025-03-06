@@ -7,6 +7,7 @@ export interface RcloneRunnerOptions {
   maxDepth?: number
   maxRetries?: number
   retryDelay?: number
+  [x: string]: any
 }
 
 const SPAWN_ALL = true
