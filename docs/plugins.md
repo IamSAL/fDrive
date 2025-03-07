@@ -1,10 +1,10 @@
-# Plugin guide for free-drive
+# Plugin guide for fdrive
 
-Plugins allow you to add features to free-drive, such as commands and
+Plugins allow you to add features to fdrive, such as commands and
 extensions to the `toolbox` object that provides the majority of the functionality
-used by free-drive.
+used by fdrive.
 
-Creating a free-drive plugin is easy. Just create a repo with two folders:
+Creating a fdrive plugin is easy. Just create a repo with two folders:
 
 ```
 commands/
@@ -42,6 +42,6 @@ This is then accessible in your plugin's commands as `toolbox.bar`.
 
 # Loading a plugin
 
-To load a particular plugin (which has to start with `free-drive-*`),
-install it to your project using `npm install --save-dev free-drive-PLUGINNAME`,
-and free-drive will pick it up automatically.
+To load a particular plugin (which has to start with `fdrive-*`),
+install it to your project using `npm install --save-dev fdrive-PLUGINNAME`,
+and fdrive will pick it up automatically.

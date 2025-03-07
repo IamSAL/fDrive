@@ -1,11 +1,11 @@
 {
-  "name": "free-drive",
+  "name": "fdrive",
   "version": "0.0.1",
-  "description": "free-drive CLI",
+  "description": "fdrive CLI",
   "private": true,
   "types": "build/types/types.d.ts",
   "bin": {
-    "free-drive": "bin/free-drive"
+    "fdrive": "bin/fdrive"
   },
   "scripts": {
     "clean-build": "rimraf -rf ./build",

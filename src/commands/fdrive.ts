@@ -3,7 +3,7 @@ import { GluegunCommand } from 'gluegun'
 import { showMenu } from '../helpers/misc'
 
 const command: GluegunCommand = {
-  name: 'free-drive',
+  name: 'fdrive',
   alias: 'fd',
   hidden: true,
   run: async (toolbox: GluegunMenuToolbox) => {

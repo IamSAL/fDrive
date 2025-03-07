@@ -33,10 +33,10 @@ jobs:
           fi
 
       - name: Run keep-active command
-        run: ./bin/free-drive accounts keep-active
+        run: ./bin/fdrive accounts keep-active
 
       - name: List accounts status
-        run: ./bin/free-drive accounts list
+        run: ./bin/fdrive accounts list
 
       - name: Commit changes
         run: |

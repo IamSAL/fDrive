@@ -95,7 +95,7 @@ const command: GluegunCommand = {
       await toolbox.account.saveAccounts(accounts)
 
       print.success(
-        `All accounts processed. Run "free-drive accounts list" to check status.`
+        `All accounts processed. Run "fdrive accounts list" to check status.`
       )
       process.exit(0)
     } catch (error) {

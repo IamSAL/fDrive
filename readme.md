@@ -1,6 +1,6 @@
-# free-drive CLI
+# fdrive CLI
 
-A CLI for free-drive.
+A CLI for fdrive.
 
 ## Customizing your CLI
 

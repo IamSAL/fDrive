@@ -6,9 +6,9 @@ import { build } from 'gluegun'
 async function run(argv) {
   // create a CLI runtime
   const cli = build()
-    .brand('free-drive')
+    .brand('fdrive')
     .src(__dirname)
-    .plugins('./node_modules', { matching: 'free-drive-*', hidden: true })
+    .plugins('./node_modules', { matching: 'fdrive-*', hidden: true })
     .plugin(__dirname + '/../node_modules/@lenne.tech/gluegun-menu/dist', {
       commandFilePattern: ['*.js'],
       extensionFilePattern: ['*.js'],

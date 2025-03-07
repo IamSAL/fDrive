@@ -1,3 +1,3 @@
-# Command Reference for free-drive
+# Command Reference for fdrive
 
 TODO: Add your command reference here

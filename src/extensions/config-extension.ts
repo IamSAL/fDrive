@@ -6,7 +6,7 @@ module.exports = async (toolbox: GluegunToolbox) => {
   const rcloneConf = await getRcloneConfig()
   toolbox.config = {
     ...toolbox.config,
-    ...toolbox.config.loadConfig('free-drive', process.cwd()),
+    ...toolbox.config.loadConfig('fdrive', process.cwd()),
     ...toolbox.config.loadConfig(
       'custom',
       path.join(process.cwd(), 'generated')
