@@ -1,26 +1,44 @@
-# fdrive CLI
+# fDrive CLI
 
-A CLI for fdrive.
+A command-line interface for managing MEGA storage accounts with various protocols and features.
 
-## Customizing your CLI
+## Quick Command Reference
 
-Check out the documentation at https://github.com/infinitered/gluegun/tree/master/docs.
+### Account Management
+- `fdrive accounts` - Manage MEGA accounts
+- `fdrive accounts create` - Create new accounts
+- `fdrive accounts verify` - Verify account status
+- `fdrive accounts list` - List all accounts
+- `fdrive accounts keep-active` - Keep accounts active
 
-## Publishing to NPM
+### Disk Operations
+- `fdrive disk` - Manage disk operations
+- `fdrive disk mount` - Mount MEGA storage
+- `fdrive disk umount` - Unmount storage
 
-To package your CLI up for NPM, do this:
+### Storage Serving
+- `fdrive serve` - Access storage via various protocols
+  - HTTP, DLNA, FTP, NFS, S3, SFTP
+  - Docker integration
+  - Web UI
+  - Restic backup
+
+For detailed command documentation and examples, see [Command Reference](docs/commands.md).
+
+## Installation
 
 ```shell
-$ npm login
-$ npm whoami
-$ npm test
-
-$ npm run build
-
-$ npm publish
+$ npm install -g fdrive
 ```
 
-# License
+## Features
+- Interactive command interface
+- Multiple account management
+- Various storage access protocols
+- Secure authentication
+- Automatic configuration management
+
+## License
 
 MIT - see LICENSE
 
