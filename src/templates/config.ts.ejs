@@ -1,5 +1,5 @@
 module.exports = {
-  <% for (const [key, value] of Object.entries(config)) { %>
-    <%= key %>: <%= JSON.stringify(value) %>,
+  <% for (const [key, value] of Object.entries(props.config)) { %>
+    <%= key.includes('-') ? `'${key}'` : key %>: <%- typeof value === 'string' ? JSON.stringify(value) : JSON.stringify(value) %>,
   <% } %>
 }

@@ -3,6 +3,7 @@ import { homedir } from 'os'
 import * as path from 'path'
 import { checkOS } from '../../helpers/check-os'
 import { runRcloneCommand } from '../../helpers/rclone-runner'
+import { updateConfig } from '../../helpers/misc'
 
 const command: GluegunCommand = {
   name: 'mount',
@@ -49,14 +50,14 @@ const command: GluegunCommand = {
       fuseWarning = 'FUSE (install using your package manager)'
     }
 
-    print.warning(
-      `\nNOTE: FUSE filesystem is required for mounting.\nPlease ensure you have ${fuseWarning} installed.`
+    print.muted(
+      `\n⚠️ NOTE: FUSE filesystem is required for mounting.\nPlease ensure you have ${fuseWarning} installed.`
     )
 
     const remoteName = `fdrive`
-
-    print.info(`\nMounting fdrive to ${mountDir}...`)
-
+    print.info('\n')
+    print.info(`Mounting fdrive to ${mountDir}...`)
+    print.divider()
     try {
       // Run rclone mount command
       const mountResult = await runRcloneCommand(
@@ -76,11 +77,23 @@ const command: GluegunCommand = {
         return
       }
 
-      print.success(`Successfully mounted ${remoteName} to ${mountDir}`)
-      print.info(
-        '\nYou can now access your MEGA storage through the mounted directory.'
+      // Verify mount by attempting to access the directory
+      try {
+        process.chdir(mountDir)
+        process.chdir(process.cwd()) // Change back to original directory
+      } catch (error) {
+        print.error(
+          `Failed to verify mount - directory not accessible: ${error.message}`
+        )
+        return
+      }
+      print.success(
+        print.checkmark + `Successfully mounted ${remoteName} to ${mountDir}`
       )
-      print.muted('Use Ctrl+C to unmount and exit.')
+      await updateConfig(toolbox, {
+        IS_MOUNTED: true,
+        MOUNT_PATHS: [...toolbox.config.MOUNT_PATHS, mountDir],
+      })
     } catch (error) {
       print.error(`Mount operation failed: ${error.message || error}`)
     }

@@ -5,4 +5,6 @@ module.exports = {
   OUTPUT_FILE_PATH: 'generated/accounts.json',
   CONCURRENT_LIMIT: 50,
   MAX_ACCOUNTS: 1000,
+  IS_MOUNTED: false,
+  MOUNT_PATHS: [],
 }

@@ -4,6 +4,7 @@ import * as path from 'path'
 import { promises as rclone } from 'rclone.js'
 
 import { InstallMegatools } from './install-megatools'
+import { IConfig } from '../types'
 
 export async function showMenu(
   toolbox: GluegunMenuToolbox | Toolbox,
@@ -217,4 +218,20 @@ export async function inputUserPass(
   ])
 
   return { user, pass }
+}
+
+export async function updateConfig(
+  toolbox: Toolbox,
+  newConfig: Partial<IConfig>
+): Promise<void> {
+  const { config } = toolbox
+  const updatedConfig = { ...config, ...newConfig }
+  delete updateConfig['free-drive']
+  await toolbox.template.generate({
+    template: 'config.ts.ejs',
+    target: `generated/custom.config.js`,
+    props: {
+      config: updatedConfig,
+    },
+  })
 }
