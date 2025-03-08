@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@lenne.tech/gluegun-menu':
-        specifier: ^0.0.6
-        version: 0.0.6(gluegun@5.2.0)
       gluegun:
         specifier: latest
         version: 5.2.0
@@ -333,11 +330,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
-
-  '@lenne.tech/gluegun-menu@0.0.6':
-    resolution: {integrity: sha512-HnGMSdTmib16Ea2HPbeaXf3Qx8fwIo3wGw+Dcduy+M15rdQv3TSdV4j3E7xqMiUrge6uyTRn8LCFx/9una2MQw==}
-    peerDependencies:
-      gluegun: '>=3'
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -3184,10 +3176,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
-
-  '@lenne.tech/gluegun-menu@0.0.6(gluegun@5.2.0)':
-    dependencies:
-      gluegun: 5.2.0
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:

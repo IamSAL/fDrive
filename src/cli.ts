@@ -8,11 +8,7 @@ async function run(argv) {
   const cli = build()
     .brand('fdrive')
     .src(__dirname)
-    // .plugins('./node_modules', { matching: 'fdrive-*', hidden: true })
-    .plugin(__dirname + '/../node_modules/@lenne.tech/gluegun-menu/dist', {
-      commandFilePattern: ['*.js'],
-      extensionFilePattern: ['*.js'],
-    })
+    .plugins('./node_modules', { matching: 'fdrive-*', hidden: true })
     .help() // provides default for help, h, --help, -h
     // .version() // provides default for version, v, --version, -v
     .exclude(['meta', 'strings', 'semver', 'patching', 'package-manager'])

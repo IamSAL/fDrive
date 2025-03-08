@@ -1,6 +1,6 @@
 {
   "name": "fdrive",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "fdrive CLI",
   "types": "build/types/types.d.ts",
   "bin": {
@@ -27,7 +27,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@lenne.tech/gluegun-menu": "^0.0.6",
     "gluegun": "latest",
     "megajs": "^1.3.5",
     "node-fetch": "^3.3.2",

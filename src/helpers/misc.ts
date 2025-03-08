@@ -1,4 +1,3 @@
-import { GluegunMenuToolbox } from '@lenne.tech/gluegun-menu'
 import { Toolbox } from 'gluegun/build/types/domain/toolbox'
 import * as path from 'path'
 import { promises as rclone } from 'rclone.js'
@@ -7,7 +6,7 @@ import { InstallMegatools } from './install-megatools'
 import { IConfig } from '../types'
 
 export async function showMenu(
-  toolbox: GluegunMenuToolbox | Toolbox,
+  toolbox: Toolbox,
   parentCommands = '',
   options: any = { byeMessage: 'Happy Hacking! 👋', showHelp: false }
 ): Promise<void> {
