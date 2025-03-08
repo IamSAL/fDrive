@@ -1,6 +1,6 @@
 {
   "name": "fdrive",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "fdrive CLI",
   "types": "build/types/types.d.ts",
   "bin": {
