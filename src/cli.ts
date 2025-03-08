@@ -8,7 +8,7 @@ async function run(argv) {
   const cli = build()
     .brand('fdrive')
     .src(__dirname)
-    .plugins('./node_modules', { matching: 'fdrive-*', hidden: true })
+    // .plugins('./node_modules', { matching: 'fdrive-*', hidden: true })
     .plugin(__dirname + '/../node_modules/@lenne.tech/gluegun-menu/dist', {
       commandFilePattern: ['*.js'],
       extensionFilePattern: ['*.js'],
