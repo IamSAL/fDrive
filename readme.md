@@ -1,8 +1,12 @@
 # fDrive CLI
 
-A command-line interface for managing MEGA storage accounts with various protocols and features.
+Create many MEGA storage accounts and merge them to use as a free single cloud drive!
+
 
 ## Quick Command Reference
+
+### Setup
+- `npx fdrive setup` - Wizard
 
 ### Account Management
 - `fdrive accounts` - Manage MEGA accounts
@@ -25,10 +29,10 @@ A command-line interface for managing MEGA storage accounts with various protoco
 
 For detailed command documentation and examples, see [Command Reference](docs/commands.md).
 
-## Installation
+## Get started 
 
 ```shell
-$ npm install -g fdrive
+$ npx fdrive
 ```
 
 ## Features
