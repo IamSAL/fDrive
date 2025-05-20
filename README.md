@@ -158,4 +158,4 @@ curl -X POST http://localhost:3000/mock \
 - TypeScript
 
 ## 📞 Contact
-For any issues or feature requests, please contact the maintainer or submit a GitHub issue.
+For any issues or feature requests, please contact the developer `sudipto.chowdhury@konasl.com` or `+8801753116311`
