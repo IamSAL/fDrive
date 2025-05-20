@@ -4,6 +4,7 @@ import { MockEndpoint, MockEndpointPath } from '../mock.entity';
 import { Request } from 'express';
 import { BackupService } from './backup.service';
 import { AppendResponseDto } from '../dto/mock-list.dto';
+import * as path from 'path';
 
 const DATA_FILE = './data/mocks.json';
 
@@ -26,6 +27,10 @@ export class MockService implements OnModuleInit {
       this.mocks.forEach(item => this.logger.log(`Project(${item.project}) / API-[${item.path}]`));
     } catch (err) {
       this.logger.error('[MockService] Failed to load JSON file:', err.message);
+      this.logger.log('[MockService] Creating Mock API Storage File:');
+      const dir = path.dirname(DATA_FILE);
+      await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
+      await fs.writeFile(DATA_FILE, JSON.stringify(this.getDefaultMockAPI(), null, 2), 'utf-8');
       this.mocks = [];
     }
   }
@@ -54,7 +59,7 @@ export class MockService implements OnModuleInit {
 
   findById(id: string): any {
     let mockEndpoint = this.mocks.find(item => item.id === id);
-    return mockEndpoint ?? "Mock Endpoint Not Found!";
+    return mockEndpoint ?? 'Mock Endpoint Not Found!';
   }
 
   async create(mock: Omit<MockEndpoint, 'id'>) {
@@ -72,7 +77,7 @@ export class MockService implements OnModuleInit {
 
   sanitizeRequest(mock: Omit<MockEndpoint, 'id'>) {
     mock.path = mock.path.trim();
-    mock.project = mock?.project ? mock.project.trim() : "KP";
+    mock.project = mock?.project ? mock.project.trim() : 'KP';
     return mock;
   }
 
@@ -133,5 +138,34 @@ export class MockService implements OnModuleInit {
     }
 
     return null;
+  }
+
+  getDefaultMockAPI() {
+    return {
+      'method': 'POST',
+      'path': '/api/user',
+      'responses': [
+        {
+          'request': {
+            'userId': 202214,
+          },
+          'responseHeader': {
+            'project-leader': 'Sudipto',
+          },
+          'response': {
+            'name': 'Sudipto Chowdhury',
+            'email': {
+              'work': 'sudipto.chowdhury@konasl.com',
+              'personal': 'dip.chy93@gmail.com',
+            },
+            'mobile': '+8801753116311',
+          },
+          'statusCode': 200,
+          'delay': 0,
+        },
+      ],
+      'project': 'KP',
+      'id': '1747713079324',
+    };
   }
 }
