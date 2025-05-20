@@ -1,0 +1,343 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/mock": {
+      "post": {
+        "operationId": "MockController_createMock",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MockEndpoint"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Mock API created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockEndpoint"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a mock API",
+        "tags": [
+          "Mock APIs"
+        ]
+      },
+      "get": {
+        "operationId": "MockController_listMocks",
+        "parameters": [
+          {
+            "name": "project",
+            "required": false,
+            "in": "query",
+            "description": "Filter mock API List by Project",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of mock APIs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MockEndpoint"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List all mock APIs with details",
+        "tags": [
+          "Mock APIs"
+        ]
+      }
+    },
+    "/mock/append/response": {
+      "post": {
+        "operationId": "MockController_appendResponse",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppendResponseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Append response to the mock API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockEndpoint"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Append response to the mock API",
+        "tags": [
+          "Mock APIs"
+        ]
+      }
+    },
+    "/mock/path": {
+      "get": {
+        "operationId": "MockController_listMockApiPath",
+        "parameters": [
+          {
+            "name": "project",
+            "required": false,
+            "in": "query",
+            "description": "Filter mock API List by Project",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List all mock APIs Path Only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MockEndpointPath"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List all mock APIs Path Only",
+        "tags": [
+          "Mock APIs"
+        ]
+      }
+    },
+    "/mock/{id}": {
+      "get": {
+        "operationId": "MockController_getMockApiDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Details of a mock API by ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mock API Details by ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MockEndpoint"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Details of a mock API by ID",
+        "tags": [
+          "Mock APIs"
+        ]
+      },
+      "delete": {
+        "operationId": "MockController_deleteMock",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Mock ID to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mock deleted (true/false)"
+          }
+        },
+        "summary": "Delete a mock API by ID",
+        "tags": [
+          "Mock APIs"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "My API",
+    "description": "Generated Swagger Spec",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "MockResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "type": "object",
+            "example": {
+              "userId": 5000050535
+            }
+          },
+          "responseHeader": {
+            "type": "object",
+            "example": {
+              "project-name": "KP"
+            }
+          },
+          "response": {
+            "type": "object",
+            "example": {
+              "message": "Success"
+            }
+          },
+          "statusCode": {
+            "type": "number",
+            "default": 200
+          },
+          "delay": {
+            "type": "number",
+            "default": 0
+          }
+        },
+        "required": [
+          "response"
+        ]
+      },
+      "MockEndpoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "project": {
+            "type": "string",
+            "example": "KP"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE"
+            ],
+            "example": "POST"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/user"
+          },
+          "responses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MockResponse"
+            }
+          }
+        },
+        "required": [
+          "method",
+          "path",
+          "responses"
+        ]
+      },
+      "AppendResponseDto": {
+        "type": "object",
+        "properties": {
+          "apiPath": {
+            "type": "string",
+            "example": "api/user"
+          },
+          "project": {
+            "type": "string",
+            "example": "KP"
+          },
+          "newResponse": {
+            "example": {
+              "request": {
+                "userId": 50001051908
+              },
+              "response": {
+                "userId": 50001051908,
+                "accountInfo": {
+                  "accountId": "36285",
+                  "userName": "기충종",
+                  "bankAccount": "1002041963212",
+                  "bankName": "우리은행",
+                  "bankCode": "020",
+                  "createdDateTime": "20231017164042729",
+                  "updatedDateTime": "20231017164042729"
+                },
+                "response": {
+                  "code": "000_000",
+                  "description": "Success."
+                }
+              },
+              "statusCode": 200,
+              "delay": 2000
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MockResponse"
+              }
+            ]
+          }
+        },
+        "required": [
+          "apiPath",
+          "project",
+          "newResponse"
+        ]
+      },
+      "MockEndpointPath": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/user"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    }
+  }
+}
