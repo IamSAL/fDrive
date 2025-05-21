@@ -7,8 +7,8 @@ async function generateSwagger() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('My API')
-    .setDescription('Generated Swagger Spec')
+    .setTitle('API Request Response Mocker')
+    .setDescription('Manage mock endpoints (GET, POST, PUT, DELETE)')
     .setVersion('1.0')
     .build();
 

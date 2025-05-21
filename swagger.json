@@ -10,7 +10,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MockEndpoint"
+                "$ref": "#/components/schemas/CreateMockApiDto"
               }
             }
           }
@@ -25,11 +25,47 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation error"
           }
         },
         "summary": "Create a mock API",
         "tags": [
-          "Mock APIs"
+          "Mock Management APIs"
+        ]
+      },
+      "put": {
+        "operationId": "MockController_updateMock",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMockRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mock API updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockEndpoint"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        },
+        "summary": "Update mock API",
+        "tags": [
+          "Mock Management APIs"
         ]
       },
       "get": {
@@ -60,13 +96,13 @@
             }
           }
         },
-        "summary": "List all mock APIs with details",
+        "summary": "List all mock APIs",
         "tags": [
-          "Mock APIs"
+          "Mock Management APIs"
         ]
       }
     },
-    "/mock/append/response": {
+    "/mock/add/response": {
       "post": {
         "operationId": "MockController_appendResponse",
         "parameters": [],
@@ -90,11 +126,14 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation error"
           }
         },
-        "summary": "Append response to the mock API",
+        "summary": "Append new responses to the existing mock API",
         "tags": [
-          "Mock APIs"
+          "Mock Management APIs"
         ]
       }
     },
@@ -120,7 +159,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MockEndpointPath"
+                    "$ref": "#/components/schemas/MockEndpointPathResponseDto"
                   }
                 }
               }
@@ -129,7 +168,7 @@
         },
         "summary": "List all mock APIs Path Only",
         "tags": [
-          "Mock APIs"
+          "Mock Management APIs"
         ]
       }
     },
@@ -141,7 +180,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Details of a mock API by ID",
+            "description": "Details of a mock API by Id",
             "schema": {
               "type": "string"
             }
@@ -160,11 +199,14 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation error"
           }
         },
-        "summary": "Details of a mock API by ID",
+        "summary": "Details of a mock API by Id",
         "tags": [
-          "Mock APIs"
+          "Mock Management APIs"
         ]
       },
       "delete": {
@@ -183,18 +225,21 @@
         "responses": {
           "200": {
             "description": "Mock deleted (true/false)"
+          },
+          "400": {
+            "description": "Validation error"
           }
         },
-        "summary": "Delete a mock API by ID",
+        "summary": "Delete a mock API by Id",
         "tags": [
-          "Mock APIs"
+          "Mock Management APIs"
         ]
       }
     }
   },
   "info": {
-    "title": "My API",
-    "description": "Generated Swagger Spec",
+    "title": "API Request Response Mocker",
+    "description": "Manage mock endpoints (GET, POST, PUT, DELETE)",
     "version": "1.0",
     "contact": {}
   },
@@ -233,7 +278,42 @@
           }
         },
         "required": [
+          "request",
           "response"
+        ]
+      },
+      "CreateMockApiDto": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "example": "KP"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/user"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE"
+            ],
+            "example": "POST"
+          },
+          "responses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MockResponse"
+            }
+          }
+        },
+        "required": [
+          "path",
+          "method",
+          "responses"
         ]
       },
       "MockEndpoint": {
@@ -274,6 +354,46 @@
           "responses"
         ]
       },
+      "UpdateMockRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "project": {
+            "type": "string",
+            "example": "KP"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE"
+            ],
+            "example": "POST"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/user"
+          },
+          "responses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MockResponse"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "project",
+          "method",
+          "path",
+          "responses"
+        ]
+      },
       "AppendResponseDto": {
         "type": "object",
         "properties": {
@@ -286,34 +406,7 @@
             "example": "KP"
           },
           "newResponse": {
-            "example": {
-              "request": {
-                "userId": 50001051908
-              },
-              "response": {
-                "userId": 50001051908,
-                "accountInfo": {
-                  "accountId": "36285",
-                  "userName": "기충종",
-                  "bankAccount": "1002041963212",
-                  "bankName": "우리은행",
-                  "bankCode": "020",
-                  "createdDateTime": "20231017164042729",
-                  "updatedDateTime": "20231017164042729"
-                },
-                "response": {
-                  "code": "000_000",
-                  "description": "Success."
-                }
-              },
-              "statusCode": 200,
-              "delay": 2000
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MockResponse"
-              }
-            ]
+            "$ref": "#/components/schemas/MockResponse"
           }
         },
         "required": [
@@ -322,7 +415,7 @@
           "newResponse"
         ]
       },
-      "MockEndpointPath": {
+      "MockEndpointPathResponseDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -335,6 +428,7 @@
           }
         },
         "required": [
+          "id",
           "path"
         ]
       }

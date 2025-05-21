@@ -97,3 +97,11 @@ export class MockEndpointPathResponseDto {
   @ApiProperty({ example: '/api/user' })
   path: string;
 }
+
+export class ProjectListResponseDto {
+  @ApiProperty({
+    required: true,
+    example: 'KP',
+  })
+  projectName: string;
+}

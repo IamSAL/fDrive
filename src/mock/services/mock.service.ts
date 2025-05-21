@@ -78,6 +78,8 @@ export class MockService implements OnModuleInit {
       project: mock.project,
       method: mock.method,
       responses: mock.responses,
+      createdAt: new Date(),
+      updatedAt: new Date()
     } as MockEndpoint;
 
     const mockPathApiExists = await this.mockRouteExists(newMockAPI.path, newMockAPI.method, newMockAPI.project);
@@ -95,9 +97,18 @@ export class MockService implements OnModuleInit {
       throw new BadRequestException('Mock API Not Found!');
     }
     this.mocks = this.mocks.filter(item => item.id !== updatedMock.id);
-    this.mocks.push(updatedMock);
+    let updatedMockAPI = {
+      id: Date.now().toString(),
+      path: updatedMock.path,
+      project: updatedMock.project,
+      method: updatedMock.method,
+      responses: updatedMock.responses,
+      createdAt: existingMock.createdAt,
+      updatedAt: new Date()
+    } as MockEndpoint;
+    this.mocks.push(updatedMockAPI);
     await this.saveToFile();
-    return updatedMock;
+    return updatedMockAPI;
   }
 
   sanitizeRequest(mock: CreateMockApiDto) {
@@ -191,5 +202,12 @@ export class MockService implements OnModuleInit {
       'project': 'KP',
       'id': '1747713079324',
     };
+  }
+
+  getProjectList() {
+    const uniqueProjects = Array.from(
+      new Set(this.mocks.map(item => item.project))
+    );
+    return uniqueProjects.map(projectName => ({ projectName }));
   }
 }
