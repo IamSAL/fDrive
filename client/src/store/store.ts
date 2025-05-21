@@ -2,20 +2,29 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { MockEndpoint } from '../types/dto';
 
-interface Client {
-  id: string;
-  name: string;
-  createdAt: number;
+export interface DeviceFingerprint {
+  id: string; // generated from IP+UA hash or similar
+  ip: string;
+  browser: string;
+  os: string;
+  device: string;
+  name?: string; // user-friendly label
+  lastSeen: number;
 }
 
-interface PendingRequest {
+export interface PendingRequest {
   id: string;
   method: string;
   path: string;
   timestamp: number;
-  status: 'pending' | 'modifying' | 'completed';
+  status: 'pending' | 'modifying' | 'completed' | 'timedout';
   headers: Record<string, string>;
   body: unknown;
+  deviceId: string; // fingerprint id
+  endpointId?: string;
+  timeStarted: number;
+  timeLeft: number; // seconds left before auto-response
+  autoRespondAt: number; // timestamp
 }
 
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected';
@@ -31,8 +40,8 @@ interface AppState {
   theme: Theme;
 
   // Live Mock state
-  activeClient: string | null;
-  clients: Client[];
+  deviceFingerprints: DeviceFingerprint[];
+  activeDevice: string | null;
   connectionStatus: ConnectionStatus;
   pendingRequests: PendingRequest[];
   
@@ -48,13 +57,13 @@ interface AppState {
   setTheme: (theme: Theme) => void;
 
   // Live Mock actions
-  setActiveClient: (clientId: string | null) => void;
-  addClient: (client: Omit<Client, 'id' | 'createdAt'>) => void;
-  removeClient: (clientId: string) => void;
+  setDeviceFingerprints: (list: DeviceFingerprint[]) => void;
+  setActiveDevice: (id: string | null) => void;
   setConnectionStatus: (status: ConnectionStatus) => void;
-  addPendingRequest: (request: Omit<PendingRequest, 'id' | 'timestamp' | 'status'>) => void;
+  addPendingRequest: (request: Omit<PendingRequest, 'id' | 'timestamp' | 'status' | 'timeStarted' | 'autoRespondAt' | 'timeLeft'>) => void;
   updateRequestStatus: (requestId: string, status: PendingRequest['status']) => void;
   clearRequests: () => void;
+  tickPendingRequests: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -69,8 +78,8 @@ export const useAppStore = create<AppState>()(
       theme: 'system' as Theme,
 
       // Live Mock state
-      activeClient: null,
-      clients: [],
+      deviceFingerprints: [],
+      activeDevice: null,
       connectionStatus: 'disconnected',
       pendingRequests: [],
 
@@ -103,39 +112,48 @@ export const useAppStore = create<AppState>()(
       },
 
       // Live Mock actions
-      setActiveClient: (clientId) => set({ activeClient: clientId }),
-      addClient: (client) =>
-        set((state) => ({
-          clients: [
-            ...state.clients,
-            { ...client, id: `client-${Date.now()}`, createdAt: Date.now() },
-          ],
-        })),
-      removeClient: (clientId) =>
-        set((state) => ({
-          clients: state.clients.filter((c) => c.id !== clientId),
-          activeClient: state.activeClient === clientId ? null : state.activeClient,
-        })),
+      setDeviceFingerprints: (list) => set({ deviceFingerprints: list }),
+      setActiveDevice: (id) => set({ activeDevice: id }),
       setConnectionStatus: (status) => set({ connectionStatus: status }),
-      addPendingRequest: (request) =>
-        set((state) => ({
+      addPendingRequest: (request) => set((state) => {
+        const now = Date.now();
+        const autoRespondAt = now + 2 * 60 * 1000; // 2 min
+        return {
           pendingRequests: [
             {
               ...request,
-              id: `req-${Date.now()}`,
-              timestamp: Date.now(),
+              id: `req-${now}`,
+              timestamp: now,
               status: 'pending',
+              timeStarted: now,
+              autoRespondAt,
+              timeLeft: 120,
             },
             ...state.pendingRequests,
           ],
-        })),
-      updateRequestStatus: (requestId, status) =>
-        set((state) => ({
-          pendingRequests: state.pendingRequests.map((req) =>
-            req.id === requestId ? { ...req, status } : req
-          ),
-        })),
+        };
+      }),
+      updateRequestStatus: (requestId, status) => set((state) => ({
+        pendingRequests: state.pendingRequests.map((req) =>
+          req.id === requestId ? { ...req, status } : req
+        ),
+      })),
       clearRequests: () => set({ pendingRequests: [] }),
+      // Tick down timers, auto-complete timed out requests
+      tickPendingRequests: () => set((state) => {
+        const now = Date.now();
+        return {
+          pendingRequests: state.pendingRequests.map((req) => {
+            if (req.status !== 'pending') return req;
+            const timeLeft = Math.max(0, Math.floor((req.autoRespondAt - now) / 1000));
+            if (timeLeft === 0 && req.status === 'pending') {
+              // Mark as timed out
+              return { ...req, status: 'timedout', timeLeft: 0 };
+            }
+            return { ...req, timeLeft };
+          }),
+        };
+      }),
     }),
     {
       name: 'app-storage',

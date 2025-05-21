@@ -11,18 +11,18 @@ import toast from 'react-hot-toast';
 interface RequestInterceptorModalProps {
   isOpen: boolean;
   onClose: () => void;
+  interceptedRequest?: any;
+  onContinue?: (reqId: string, response: any) => void;
 }
 
 export const RequestInterceptorModal: React.FC<RequestInterceptorModalProps> = ({
   isOpen,
   onClose,
+  interceptedRequest,
+  onContinue,
 }) => {
-  const [responseJson, setResponseJson] = useState(JSON.stringify({ message: 'Success' }, null, 2));
-  const [responseDelay, setResponseDelay] = useState('0');
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Mock request data
-  const request = {
+  // Use interceptedRequest if provided, else fallback to mock
+  const request = interceptedRequest?.request || {
     id: '123',
     method: 'POST',
     path: '/api/users',
@@ -35,14 +35,28 @@ export const RequestInterceptorModal: React.FC<RequestInterceptorModalProps> = (
       email: 'john@example.com',
     },
   };
+  const [responseJson, setResponseJson] = useState('');
+  const [responseDelay, setResponseDelay] = useState('0');
+  const [isSaving, setIsSaving] = useState(false);
+
+  React.useEffect(() => {
+    setResponseJson(
+      JSON.stringify(interceptedRequest?.defaultResponse?.body || { message: 'Success' }, null, 2)
+    );
+    setResponseDelay(interceptedRequest?.defaultResponse?.delay?.toString() || '0');
+  }, [interceptedRequest, isOpen]);
 
   const handleContinue = async () => {
     try {
-      // Validate JSON
-      JSON.parse(responseJson);
-      
-      // Here we'll send the modified response
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const parsed = JSON.parse(responseJson);
+      if (onContinue && interceptedRequest?.reqId) {
+        onContinue(interceptedRequest.reqId, {
+          statusCode: interceptedRequest?.defaultResponse?.statusCode || 200,
+          headers: interceptedRequest?.defaultResponse?.headers || {},
+          body: parsed,
+          delay: Number(responseDelay) || 0,
+        });
+      }
       toast.success('Response sent successfully');
       onClose();
     } catch (error) {

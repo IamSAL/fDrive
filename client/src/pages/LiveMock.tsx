@@ -1,23 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import { useAppStore } from '../store/store';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { Tabs } from '../components/ui/Tabs';
 import { ClientSetupModal } from '../components/ClientSetupModal';
 import { RequestInterceptorModal } from '../components/RequestInterceptorModal';
 import { Wifi, WifiOff, Plus, RefreshCw, Search } from 'lucide-react';
 import { Input } from '../components/ui/Input';
+import { io, Socket } from 'socket.io-client';
+import { useAppStore } from '../store/store';
+
+interface InterceptedRequest {
+  reqId: string;
+  clientId: string;
+  request: { method: string; path: string; headers: Record<string, string>; body: any };
+  defaultResponse: any;
+  status: 'pending' | 'completed';
+  timestamp?: number;
+}
 
 export const LiveMock: React.FC = () => {
   const [isClientSetupOpen, setIsClientSetupOpen] = useState(false);
   const [isInterceptorOpen, setIsInterceptorOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Mock data for development
-  const requests = [
-    { id: '1', method: 'GET', path: '/api/users', timestamp: Date.now(), status: 'pending' as const },
-    { id: '2', method: 'POST', path: '/api/orders', timestamp: Date.now() - 5000, status: 'completed' as const },
-  ];
+  const [requests, setRequests] = useState<InterceptedRequest[]>([]);
+  const [interceptedRequest, setInterceptedRequest] = useState<InterceptedRequest | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  // Zustand store for client state
+  const activeClientId = useAppStore((s) => s.activeClient);
+  const setActiveClient = useAppStore((s) => s.setActiveClient);
+  const clients = useAppStore((s) => s.clients);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('disconnected');
+
+  // Connect to socket.io when a client is selected
+  useEffect(() => {
+    if (!activeClientId) return;
+    setConnectionStatus('connecting');
+    const s = io('http://localhost:3000/live-mock');
+    setSocket(s);
+    s.emit('register', { role: 'ui' });
+    s.on('registered', () => {
+      setConnectionStatus('connected');
+      s.emit('watch', { clientId: activeClientId });
+    });
+    s.on('connect_error', () => setConnectionStatus('disconnected'));
+    s.on('disconnect', () => setConnectionStatus('disconnected'));
+    s.on('intercept-request', (data) => {
+      setRequests((prev) => [{ ...data, status: 'pending' }, ...prev]);
+      setInterceptedRequest(data);
+      setIsInterceptorOpen(true);
+    });
+    return () => {
+      s.disconnect();
+      setSocket(null);
+      setConnectionStatus('disconnected');
+    };
+  }, [activeClientId]);
+
+  // Handle continue (send override)
+  const handleContinue = (reqId: string, response: unknown) => {
+    if (socket) {
+      socket.emit('override-response', { reqId, response });
+      setInterceptedRequest(null);
+      setIsInterceptorOpen(false);
+      setRequests((prev) => prev.map(r => r.reqId === reqId ? { ...r, status: 'completed' } : r));
+    }
+  };
 
   const getStatusIcon = (status: 'connected' | 'disconnected' | 'connecting') => {
     switch (status) {
@@ -77,16 +124,16 @@ export const LiveMock: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Active Client</span>
-            {getStatusIcon('connected')}
+            {getStatusIcon(connectionStatus)}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Client ID: test-client-1</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Connected since: 2 minutes ago</p>
+              <p className="text-sm font-medium">Client ID: {activeClientId || 'None selected'}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{connectionStatus === 'connected' ? 'Connected' : 'Not connected'}</p>
             </div>
-            <Button variant="outline" size="sm" className="text-red-600 dark:text-red-400">
+            <Button variant="outline" size="sm" className="text-red-600 dark:text-red-400" onClick={() => setActiveClient(null)}>
               Disconnect
             </Button>
           </div>
@@ -117,19 +164,19 @@ export const LiveMock: React.FC = () => {
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {requests.map((request) => (
               <div
-                key={request.id}
+                key={request.reqId}
                 className="py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-                onClick={() => setIsInterceptorOpen(true)}
+                onClick={() => { setInterceptedRequest(request); setIsInterceptorOpen(true); }}
               >
                 <div className="flex items-center space-x-4">
-                  <span className={`font-mono font-medium ${getMethodColor(request.method)}`}>
-                    {request.method}
+                  <span className={`font-mono font-medium ${getMethodColor(request.request.method)}`}>
+                    {request.request.method}
                   </span>
-                  <span className="text-gray-900 dark:text-gray-100">{request.path}</span>
+                  <span className="text-gray-900 dark:text-gray-100">{request.request.path}</span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-gray-500">
-                    {new Date(request.timestamp).toLocaleTimeString()}
+                    {request.timestamp ? new Date(request.timestamp).toLocaleTimeString() : ''}
                   </span>
                   <span
                     className={`px-2 py-1 text-xs rounded-full ${
@@ -153,8 +200,10 @@ export const LiveMock: React.FC = () => {
       />
 
       <RequestInterceptorModal
-        isOpen={isInterceptorOpen}
-        onClose={() => setIsInterceptorOpen(false)}
+        isOpen={isInterceptorOpen && !!interceptedRequest}
+        onClose={() => { setIsInterceptorOpen(false); setInterceptedRequest(null); }}
+        interceptedRequest={interceptedRequest}
+        onContinue={handleContinue}
       />
     </div>
   );
