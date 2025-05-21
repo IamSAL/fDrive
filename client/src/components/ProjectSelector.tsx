@@ -12,10 +12,10 @@ export const ProjectSelector: React.FC = () => {
     const fetchProjects = async () => {
       try {
         setIsLoading(true);
-        const endpoints = await apiService.listMocks();
+        const projects = await apiService.listProjects();
         
         // Extract unique project names
-        const uniqueProjects = [...new Set(endpoints.map(endpoint => endpoint.project))];
+        const uniqueProjects = [...new Set(projects.map(projects => projects.projectName))];
         setProjects(uniqueProjects);
         
         // Set default project if none selected

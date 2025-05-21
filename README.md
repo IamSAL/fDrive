@@ -1,155 +1,200 @@
-# Mock API Service
+# API Request Response Mocker
 
-This project provides a RESTful API to create, manage, and retrieve mock endpoints. It can be used for simulating APIs during development or testing.
-
-## 📚 API Overview
-
-- **Base Path**: `/`
-- **Version**: 1.0
-- **OpenAPI**: 3.0.0
-- **Tag**: Mock APIs
-
-## 📦 Endpoints
-
-### 1. Create a Mock API
-
-- **POST** `/mock`
-- **Description**: Create a new mock API.
-- **Request Body**:
-    - Content-Type: `application/json`
-    - Schema: `MockEndpoint`
-- **Response**: `201 Created`  
-  Returns the created mock endpoint.
+A service to manage mock endpoints (GET, POST, PUT, DELETE). This allows dynamic creation, retrieval, updating, and deletion of mock APIs, along with the ability to append new responses.
 
 ---
 
-### 2. List All Mock APIs
+## 📘 API Overview
 
-- **GET** `/mock`
-- **Description**: List all existing mock APIs.
+**Base URL**: _`/` (assumed)_
+
+**Version**: 1.0
+
+---
+
+## 📚 Endpoints
+
+### 🔹 Create a Mock API
+
+**POST** `/mock`
+
+- **Summary**: Create a new mock API
+- **Request Body**: [CreateMockApiDto](#createmockapidto)
+- **Responses**:
+  - `201`: Mock API created – returns [MockEndpoint](#mockendpoint)
+  - `400`: Validation error
+
+---
+
+### 🔹 Update a Mock API
+
+**PUT** `/mock`
+
+- **Summary**: Update an existing mock API
+- **Request Body**: [UpdateMockRequestDto](#updatemockrequestdto)
+- **Responses**:
+  - `200`: Mock API updated – returns [MockEndpoint](#mockendpoint)
+  - `400`: Validation error
+
+---
+
+### 🔹 List All Mock APIs
+
+**GET** `/mock`
+
+- **Summary**: List all mock APIs
 - **Query Parameters**:
-    - `project` (optional): Filter by project name.
-- **Response**: `200 OK`  
-  Returns an array of `MockEndpoint` objects.
+  - `project` (optional): Filter by project name
+- **Responses**:
+  - `200`: List of mock APIs – returns array of [MockEndpoint](#mockendpoint)
 
 ---
 
-### 3. Append a Response to an Existing Mock
+### 🔹 Append a New Response
 
-- **POST** `/mock/append/response`
-- **Description**: Append a new mock response to an existing endpoint.
-- **Request Body**:
-    - Schema: `AppendResponseDto`
-- **Response**: `200 OK`  
-  Updated `MockEndpoint`.
+**POST** `/mock/add/response`
+
+- **Summary**: Append new responses to an existing mock API
+- **Request Body**: [AppendResponseDto](#appendresponsedto)
+- **Responses**:
+  - `200`: Response appended – returns [MockEndpoint](#mockendpoint)
+  - `400`: Validation error
 
 ---
 
-### 4. Get All Mock API Paths
+### 🔹 List All Mock API Paths
 
-- **GET** `/mock/path`
-- **Description**: Retrieve all mock endpoint paths.
+**GET** `/mock/path`
+
+- **Summary**: List all mock API paths only
 - **Query Parameters**:
-    - `project` (optional): Filter by project.
-- **Response**: `200 OK`  
-  Returns an array of `MockEndpointPath`.
+  - `project` (optional): Filter by project name
+- **Responses**:
+  - `200`: Array of paths – returns [MockEndpointPathResponseDto](#mockendpointpathresponsedto)
 
 ---
 
-### 5. Get Mock API Details by ID
+### 🔹 Get Mock API Details by ID
 
-- **GET** `/mock/{id}`
-- **Description**: Retrieve full details for a specific mock API.
+**GET** `/mock/{id}`
+
+- **Summary**: Get mock API details by ID
 - **Path Parameter**:
-    - `id`: ID of the mock endpoint.
-- **Response**: `200 OK`  
-  Returns an array of `MockEndpoint` (typically one item).
+  - `id` (string) – ID of the mock API
+- **Responses**:
+  - `200`: Array of [MockEndpoint](#mockendpoint)
+  - `400`: Validation error
 
 ---
 
-### 6. Delete a Mock API
+### 🔹 Delete a Mock API by ID
 
-- **DELETE** `/mock/{id}`
-- **Description**: Delete a mock endpoint by ID.
+**DELETE** `/mock/{id}`
+
+- **Summary**: Delete a mock API by ID
 - **Path Parameter**:
-    - `id`: ID of the mock to delete.
-- **Response**: `200 OK`  
-  Returns a boolean indicating success.
+  - `id` (string) – ID of the mock API
+- **Responses**:
+  - `200`: Boolean (true/false)
+  - `400`: Validation error
 
 ---
 
-## 🧩 Schema Definitions
+## 🧱 Schemas
 
-### 🔹 MockEndpoint
+### CreateMockApiDto
 
 ```json
 {
-  "id": "string",
-  "project": "string",
-  "method": "GET | POST | PUT | DELETE",
-  "path": "string",
-  "responses": [MockResponse]
+  "project": "KP",
+  "path": "/api/user",
+  "method": "POST",
+  "responses": [
+    {
+      "request": { "userId": 5000050535 },
+      "responseHeader": { "project-name": "KP" },
+      "response": { "message": "Success" },
+      "statusCode": 200,
+      "delay": 0
+    }
+  ]
+}
+```
+
+### UpdateMockRequestDto
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "project": "KP",
+  "method": "POST",
+  "path": "/api/user",
+  "responses": [
+    {
+      "request": { "userId": 5000050535 },
+      "responseHeader": { "project-name": "KP" },
+      "response": { "message": "Success" },
+      "statusCode": 200,
+      "delay": 0
+    }
+  ]
 }
 
 ```
 
-### 🔹 MockResponse
-
-```json
-{
-    "request": { "userId": 12345 },
-    "responseHeader": { "project-name": "KP" },
-    "response": { "message": "Success" },
-    "statusCode": 200,
-    "delay": 0
-}
-
-```
-
-
-### 🔹 AppendResponseDto
-
+### AppendResponseDto
 ```json
 {
   "apiPath": "/api/user",
   "project": "KP",
-  "newResponse": MockResponse
+  "newResponse": {
+    "request": { "userId": 5000050535 },
+    "responseHeader": { "project-name": "KP" },
+    "response": { "message": "Success" },
+    "statusCode": 200,
+    "delay": 0
+  }
 }
-
-
 ```
 
-### 🔹 MockEndpointPath
-
+### MockEndpoint
 ```json
 {
-  "id": "string",
-  "path": "/api/user"
-}
-
-```
-
-## 🚀 Getting Started
-To use this API:
-- Start the NestJS server.
-- Visit Swagger UI (typically hosted at /api if configured).
-
-### Use Postman or curl to test the endpoints.
-
-```bash
-curl -X POST http://localhost:3000/mock \
--H "Content-Type: application/json" \
--d '{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
   "project": "KP",
   "method": "POST",
   "path": "/api/user",
-  "responses": [{
-    "response": {
-      "message": "Mocked Response"
-    },
-    "statusCode": 200
-  }]
-}'
+  "responses": [
+    {
+      "request": { "userId": 5000050535 },
+      "responseHeader": { "project-name": "KP" },
+      "response": { "message": "Success" },
+      "statusCode": 200,
+      "delay": 0
+    }
+  ]
+}
+
+```
+
+### MockResponse
+```json
+{
+  "request": { "userId": 5000050535 },
+  "responseHeader": { "project-name": "KP" },
+  "response": { "message": "Success" },
+  "statusCode": 200,
+  "delay": 0
+}
+```
+
+### MockEndpointPathResponseDto
+
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "path": "/api/user"
+}
+
 ```
 
 ## 🛠 Tech Stack

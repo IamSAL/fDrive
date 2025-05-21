@@ -62,4 +62,20 @@ export class MockEndpoint {
   @IsNotEmpty()
   @ApiProperty({  required: true, type: [MockResponse] })
   responses: MockResponse[];
+
+  @IsOptional()
+  @ApiProperty({
+    required: false,
+    example: '2024-01-01T12:00:00.000Z',
+    description: 'Timestamp when the mock was created',
+  })
+  createdAt?: Date;
+
+  @IsOptional()
+  @ApiProperty({
+    required: false,
+    example: '2024-01-02T15:30:00.000Z',
+    description: 'Timestamp when the mock was last updated',
+  })
+  updatedAt?: Date;
 }

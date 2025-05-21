@@ -18,6 +18,12 @@ export interface MockEndpoint {
   responses: MockResponse[];
 }
 
+export interface Project {
+  
+    projectName: string
+  
+}
+
 export interface MockEndpointPath {
   id: string;
   path: string;

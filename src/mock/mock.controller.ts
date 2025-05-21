@@ -11,7 +11,7 @@ import {
 import {
   AppendResponseDto, CreateMockApiDto,
   GetMockListQuery,
-  MockEndpointPathResponseDto,
+  MockEndpointPathResponseDto, ProjectListResponseDto,
   UpdateMockRequestDto,
 } from './dto/mock.dto';
 
@@ -102,5 +102,16 @@ export class MockController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   async deleteMock(@Param('id') id: string) {
     return await this.mockService.delete(id);
+  }
+
+  @Get("projects/list")
+  @ApiOperation({ summary: 'List all projects' })
+  @ApiResponse({
+    status: 200,
+    description: 'List all projects',
+    type: [ProjectListResponseDto],
+  })
+  async getProjectList() {
+    return this.mockService.getProjectList();
   }
 }
