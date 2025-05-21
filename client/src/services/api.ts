@@ -111,7 +111,8 @@ export const apiService = {
     method: string,
     body?: any
   ): Promise<any> => {
-    const url = `${baseUrl}${path}`;
+    console.log({body})
+    let url = `${baseUrl}${path}`;
     const options: RequestInit = {
       method,
       headers: {
@@ -122,7 +123,13 @@ export const apiService = {
     if (body && (method === "POST" || method === "PUT")) {
       options.body = JSON.stringify(body);
     }
+    if (body && (method === 'GET')) {
+    const query = Object.keys(body)
+        .map((k) => encodeURIComponent(k) + '=' + encodeURIComponent(body[k]))
+        .join('&');
 
+      url += "?"+query;
+    }
     const response = await fetch(url, options);
     return {
       status: response.status,

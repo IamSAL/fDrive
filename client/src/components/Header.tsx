@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAppStore } from '../store/store';
+
 import { PlusCircle, Settings, Menu, X, ListTree, Radio } from 'lucide-react';
+import { isDevelopmentMode } from '../lib/utils';
 
 export const Header: React.FC = () => {
   const location = useLocation();
-  const { baseUrl, setBaseUrl } = useAppStore();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isInputHovered, setIsInputHovered] = useState(false)
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const navLinks = [
     { to: '/', label: 'Mock List', icon: <ListTree className="w-4 h-4 mr-2" /> },
     { to: '/create', label: 'Create New', icon: <PlusCircle className="w-4 h-4 mr-2" /> },
-    { to: '/live', label: 'Live Mock', icon: <Radio className="w-4 h-4 mr-2" />, highlight: true },
+   isDevelopmentMode()? { to: '/live', label: 'Live Mock', icon: <Radio className="w-4 h-4 mr-2" />, highlight: true }:null,
     { to: '/settings', label: '', icon: <Settings className="w-4 h-4 mr-2" /> },
     
   ];
@@ -35,7 +36,8 @@ export const Header: React.FC = () => {
            
             {/* Desktop navigation */}
             <nav className="hidden sm:ml-6 sm:flex sm:space-x-4 items-center">
-              {navLinks.map((link) => (
+              {navLinks.filter(m=>!!m).map((link) => (
+            
                 <Link
                   key={link.to}
                   to={link.to}

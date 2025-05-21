@@ -143,7 +143,7 @@ export class MockService implements OnModuleInit {
 
     const method = req.method.toUpperCase();
     const path = req.baseUrl;
-    const body = req.body;
+    const body = req.body || req.query;
     const project = req?.headers['project-name'] || 'KP';
 
     for (const mock of this.mocks) {

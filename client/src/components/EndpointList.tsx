@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit, Trash2, Play, ChevronRight, ChevronDown, FileOutput } from 'lucide-react';
+import { Edit, Trash2, Play, ChevronRight, ChevronDown, FileOutput, Clipboard } from 'lucide-react';
 import { useAppStore } from '../store/store';
 import { MockEndpoint } from '../types/api';
 import { apiService } from '../services/api';
@@ -10,6 +10,8 @@ import { Input } from './ui/Input';
 import { TestModal } from './TestModal';
 import toast from 'react-hot-toast';
 import { generateOpenAPISpec } from '../lib/swagger';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from './ui/Dialog';
+import { getCurlCommand } from '../lib/utils';
 
 interface TestResult {
   status: number;
@@ -19,11 +21,15 @@ interface TestResult {
 
 export const EndpointList: React.FC = () => {
   const navigate = useNavigate();
-  const { mockEndpoints, removeMockEndpoint, currentProject, baseUrl } = useAppStore();
+  const { mockEndpoints, deleteMockEndpoint, currentProject, baseUrl } = useAppStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedEndpoints, setExpandedEndpoints] = useState<Record<string, boolean>>({});
   const [testModalEndpoint, setTestModalEndpoint] = useState<MockEndpoint | null>(null);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleteCountdown, setDeleteCountdown] = useState(5);
+  const countdownRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const toggleEndpoint = (id: string) => {
     setExpandedEndpoints((prev) => ({
@@ -35,7 +41,7 @@ export const EndpointList: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       await apiService.deleteMock(id);
-      removeMockEndpoint(id);
+      deleteMockEndpoint(id);
       toast.success('Endpoint deleted successfully');
     } catch (error) {
       toast.error('Failed to delete endpoint');
@@ -44,6 +50,7 @@ export const EndpointList: React.FC = () => {
   };
 
   const handleTestEndpoint = async (request?: Record<string, unknown>) => {
+    console.log({request})
     if (!testModalEndpoint) return;
     
     try {
@@ -75,6 +82,39 @@ export const EndpointList: React.FC = () => {
   const closeTestModal = () => {
     setTestModalEndpoint(null);
     setTestResult(null);
+  };
+
+  const openDeleteDialog = (id: string) => {
+    setDeleteTargetId(id);
+    setDeleteCountdown(6);
+    setDeleteDialogOpen(true);
+  };
+
+  React.useEffect(() => {
+    if (!deleteDialogOpen) {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      return;
+    }
+    setDeleteCountdown(6);
+    countdownRef.current = setInterval(() => {
+      setDeleteCountdown((prev) => {
+        if (prev <= 1) {
+          if (countdownRef.current) clearInterval(countdownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [deleteDialogOpen]);
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetId) return;
+    await handleDelete(deleteTargetId);
+    setDeleteDialogOpen(false);
+    setDeleteTargetId(null);
   };
 
   const filteredEndpoints = mockEndpoints.filter((endpoint) => {
@@ -126,6 +166,8 @@ export const EndpointList: React.FC = () => {
       toast.error('Failed to export swagger specification');
     }
   };
+
+
 
   return (
     <div className="space-y-4">
@@ -187,6 +229,23 @@ export const EndpointList: React.FC = () => {
               )}
             </div>
             <div className="flex items-center space-x-2">
+              {/* Copy as cURL for first response (unexpanded) */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={e => {
+                  e.stopPropagation();
+                  if (endpoint.responses.length > 0) {
+                    const curl = getCurlCommand(endpoint, endpoint.responses[0]);
+                    navigator.clipboard.writeText(curl);
+                    toast.success('Copied as cURL!');
+                  }
+                }}
+                leftIcon={<Clipboard className="w-4 h-4" />}
+                aria-label="Copy as cURL"
+              >
+                cURL
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -214,7 +273,7 @@ export const EndpointList: React.FC = () => {
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDelete(endpoint.id!);
+                  openDeleteDialog(endpoint.id!);
                 }}
                 leftIcon={<Trash2 className="w-4 h-4 text-red-500" />}
               >
@@ -243,6 +302,20 @@ export const EndpointList: React.FC = () => {
                           </span>
                         )}
                       </div>
+                      {/* Copy as cURL for each response (expanded) */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const curl = getCurlCommand(endpoint, response);
+                          navigator.clipboard.writeText(curl);
+                          toast.success('Copied as cURL!');
+                        }}
+                        leftIcon={<Clipboard className="w-4 h-4" />}
+                        aria-label="Copy as cURL"
+                      >
+                        cURL
+                      </Button>
                     </div>
                     {response.request && (
                       <div className="mb-2">
@@ -272,9 +345,33 @@ export const EndpointList: React.FC = () => {
           isOpen={true}
           onClose={closeTestModal}
           onTest={handleTestEndpoint}
-          testResult={testResult}
+          testResult={testResult || undefined}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Endpoint</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this endpoint? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              variant="danger"
+              onClick={handleDeleteConfirm}
+              disabled={deleteCountdown > 0}
+            >
+              {deleteCountdown > 0 ? `Delete (${deleteCountdown})` : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { MockResponse } from '../types/api';
 import { Card, CardContent } from './ui/Card';
@@ -6,7 +6,7 @@ import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { JsonEditor } from './JsonEditor';
 import { Tabs } from './ui/Tabs';
-import { Trash2 } from 'lucide-react';
+import { Trash2, RotateCcw } from 'lucide-react';
 
 interface ResponseFormProps {
   initialResponse?: MockResponse;
@@ -29,44 +29,85 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
     delay: 0
   };
   
-  const { control, handleSubmit, formState: { errors } } = useForm<MockResponse>({
+  const { control, formState: { errors }, watch, setValue } = useForm<MockResponse>({
     defaultValues: defaultResponse
   });
-  
-  const [requestJson, setRequestJson] = useState(JSON.stringify(defaultResponse.request || {}, null, 2));
-  const [responseHeaderJson, setResponseHeaderJson] = useState(JSON.stringify(defaultResponse.responseHeader || {}, null, 2));
-  const [responseJson, setResponseJson] = useState(JSON.stringify(defaultResponse.response || {}, null, 2));
-  
+
+  // Keep a ref to the original for reset/dirty check
+  const originalRef = useRef({
+    request: JSON.stringify(defaultResponse.request || {}, null, 2),
+    responseHeader: JSON.stringify(defaultResponse.responseHeader || {}, null, 2),
+    response: JSON.stringify(defaultResponse.response || {}, null, 2),
+    statusCode: defaultResponse.statusCode,
+    delay: defaultResponse.delay
+  });
+
+  const [requestJson, setRequestJson] = useState(originalRef.current.request);
+  const [responseHeaderJson, setResponseHeaderJson] = useState(originalRef.current.responseHeader);
+  const [responseJson, setResponseJson] = useState(originalRef.current.response);
+
+  // Watch for statusCode and delay changes
+  const statusCode = watch('statusCode');
+  const delay = watch('delay');
+
   const validateJson = (jsonString: string): boolean => {
     try {
       JSON.parse(jsonString);
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   };
 
-  const onSubmit = (data: MockResponse) => {
-    try {
+  // Check if any field is dirty compared to original
+  const isDirty =
+    requestJson !== originalRef.current.request ||
+    responseHeaderJson !== originalRef.current.responseHeader ||
+    responseJson !== originalRef.current.response ||
+    statusCode !== originalRef.current.statusCode ||
+    delay !== originalRef.current.delay;
+
+  // Auto-save when valid and dirty
+  useEffect(() => {
+    if (
+      validateJson(requestJson) &&
+      validateJson(responseHeaderJson) &&
+      validateJson(responseJson) &&
+      isDirty
+    ) {
       const formattedResponse: MockResponse = {
-        ...data,
         request: requestJson ? JSON.parse(requestJson) : {},
         responseHeader: responseHeaderJson ? JSON.parse(responseHeaderJson) : {},
-        response: responseJson ? JSON.parse(responseJson) : {}
+        response: responseJson ? JSON.parse(responseJson) : {},
+        statusCode,
+        delay
       };
       onSave(formattedResponse);
-    } catch (error) {
-      console.error('Error parsing JSON:', error);
+      // Update originalRef to new value after save
+      originalRef.current = {
+        request: requestJson,
+        responseHeader: responseHeaderJson,
+        response: responseJson,
+        statusCode,
+        delay
+      };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestJson, responseHeaderJson, responseJson, statusCode, delay]);
+
+  // Reset handler
+  const handleReset = () => {
+    setRequestJson(originalRef.current.request);
+    setResponseHeaderJson(originalRef.current.responseHeader);
+    setResponseJson(originalRef.current.response);
+    setValue('statusCode', originalRef.current.statusCode);
+    setValue('delay', originalRef.current.delay);
   };
 
   return (
     <Card className="mb-6">
       <CardContent className="p-4">
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(onSubmit)(e);
-        }}>
+        <form onSubmit={e => e.preventDefault()}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <Controller
               name="statusCode"
@@ -79,11 +120,10 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
                   placeholder="200"
                   error={errors.statusCode?.message}
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  onChange={e => field.onChange(parseInt(e.target.value, 10))}
                 />
               )}
             />
-            
             <Controller
               name="delay"
               control={control}
@@ -94,12 +134,11 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
                   placeholder="0"
                   error={errors.delay?.message}
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  onChange={e => field.onChange(parseInt(e.target.value, 10))}
                 />
               )}
             />
           </div>
-          
           <Tabs
             items={[
               {
@@ -161,7 +200,6 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
               }
             ]}
           />
-          
           <div className="flex justify-between mt-4">
             <div>
               {onDelete && (
@@ -175,28 +213,24 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
                 </Button>
               )}
             </div>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 items-center">
+              {isDirty && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleReset}
+                  title="Reset to original"
+                  className="p-2"
+                >
+                  <RotateCcw className="w-5 h-5 text-gray-400" />
+                </Button>
+              )}
               {onCancel && (
                 <Button type="button" variant="outline" onClick={onCancel}>
                   Cancel
                 </Button>
               )}
-              <Button 
-                type="button"
-                // className='disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed'
-                onClick={() => {
-
-                  handleSubmit(onSubmit)()
-                }}
-                disabled={
-                  !requestJson ||
-                  !validateJson(requestJson) || 
-                  !validateJson(responseHeaderJson) || 
-                  !validateJson(responseJson)
-                }
-              >
-                Save Response
-              </Button>
+              {/* Save Response button removed, auto-save is now active */}
             </div>
           </div>
         </form>

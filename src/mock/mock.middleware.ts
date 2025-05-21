@@ -8,7 +8,9 @@ export class MockMiddleware implements NestMiddleware {
 
   private logger = new Logger('HTTP');
   use(req: Request, res: Response, next: NextFunction) {
-    this.logger.log(`${req.method} ${req.originalUrl}, ${JSON.stringify(req.body)}`);
+    this.logger.log(
+      `${req.method} ${req.originalUrl}, ${JSON.stringify(req.body)} ${JSON.stringify(req.query)}`,
+    );
     const matched = this.mockService.findMatchingMock(req);
     if (matched) {
       const { response, delay = 0, statusCode = 200, responseHeader } = matched;

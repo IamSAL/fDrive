@@ -68,7 +68,7 @@ export const TestModal: React.FC<TestModalProps> = ({
                 label="Select Request"
                 options={[
                   ...responseOptions,
-                  { value: 'custom', label: 'Custom Request' }
+                  // { value: 'custom', label: 'Custom Request' }
                 ]}
                 value={isCustomRequest ? 'custom' : selectedResponse ? responseOptions.find(opt =>
                   opt.value === endpoint.responses.indexOf(selectedResponse).toString()

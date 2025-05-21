@@ -8,6 +8,7 @@ import { EditEndpoint } from './pages/EditEndpoint';
 import { Settings } from './pages/Settings';
 import { LiveMock } from './pages/LiveMock';
 import { useAppStore } from './store/store';
+import { MonacoPreload } from './components/MonacoPreload';
 
 function App() {
   const { theme, setTheme } = useAppStore();
@@ -31,6 +32,7 @@ function App() {
 
   return (
     <Router>
+      <MonacoPreload />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
         <Header />
         <main className="pb-12">

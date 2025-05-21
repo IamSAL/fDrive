@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button';
 import { SwaggerImportModal } from '../components/SwaggerImportModal';
 import { SwaggerDefinition } from '../types/swagger';
 import toast from 'react-hot-toast';
+import { isDevelopmentMode } from '../lib/utils';
 
 export const Dashboard: React.FC = () => {
   const { setMockEndpoints, setLoading, isLoading, currentProject, error, setError } = useAppStore();
@@ -63,7 +64,7 @@ export const Dashboard: React.FC = () => {
           >
             Refresh
           </Button>
-          <Button
+          {isDevelopmentMode() &&  <Button
             className='whitespace-nowrap'
             variant="outline"
             onClick={() => setIsImportModalOpen(true)}
@@ -74,7 +75,7 @@ export const Dashboard: React.FC = () => {
             </svg>}
           >
             Import Swagger
-          </Button>
+          </Button>}
           <Link to="/create">
             <Button className='whitespace-nowrap ' leftIcon={<PlusCircle className="w-4 h-4" />}>
               Create New
