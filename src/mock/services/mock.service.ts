@@ -1,9 +1,14 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs/promises';
-import { MockEndpoint, MockEndpointPath } from '../mock.entity';
+import { MockEndpoint } from '../mock.entity';
 import { Request } from 'express';
 import { BackupService } from './backup.service';
-import { AppendResponseDto } from '../dto/mock-list.dto';
+import {
+  AppendResponseDto,
+  CreateMockApiDto,
+  MockEndpointPathResponseDto,
+  UpdateMockRequestDto,
+} from '../dto/mock.dto';
 import * as path from 'path';
 
 const DATA_FILE = './data/mocks.json';
@@ -49,7 +54,7 @@ export class MockService implements OnModuleInit {
     return this.mocks.filter(item => item.project === project);
   }
 
-  findAllPath(project?: string): MockEndpointPath[] {
+  findAllPath(project?: string): MockEndpointPathResponseDto[] {
     if (!project)
       return this.mocks.map(({ id, path }) => ({ id, path }));
     return this.mocks
@@ -59,23 +64,43 @@ export class MockService implements OnModuleInit {
 
   findById(id: string): any {
     let mockEndpoint = this.mocks.find(item => item.id === id);
-    return mockEndpoint ?? 'Mock Endpoint Not Found!';
+    if (!mockEndpoint) {
+      throw new BadRequestException('Mock API not found!');
+    }
+    return mockEndpoint;
   }
 
-  async create(mock: Omit<MockEndpoint, 'id'>) {
+  async create(mock: CreateMockApiDto) {
     mock = this.sanitizeRequest(mock);
-    const newMock: MockEndpoint = {
-      ...mock,
+    let newMockAPI = {
       id: Date.now().toString(),
-    };
-    const mockPathExists = await this.mockRouteExists(newMock.path, newMock.method, newMock.project);
-    if (mockPathExists) return 'API Endpoint Already Exists!';
-    this.mocks.push(newMock);
+      path: mock.path,
+      project: mock.project,
+      method: mock.method,
+      responses: mock.responses,
+    } as MockEndpoint;
+
+    const mockPathApiExists = await this.mockRouteExists(newMockAPI.path, newMockAPI.method, newMockAPI.project);
+    if (mockPathApiExists) {
+      throw new BadRequestException('Mock API already exists');
+    }
+    this.mocks.push(newMockAPI);
     await this.saveToFile();
-    return newMock;
+    return newMockAPI;
   }
 
-  sanitizeRequest(mock: Omit<MockEndpoint, 'id'>) {
+  async update(updatedMock: UpdateMockRequestDto) {
+    let existingMock = this.findById(updatedMock.id);
+    if (!existingMock?.id) {
+      throw new BadRequestException('Mock API Not Found!');
+    }
+    this.mocks = this.mocks.filter(item => item.id !== updatedMock.id);
+    this.mocks.push(updatedMock);
+    await this.saveToFile();
+    return updatedMock;
+  }
+
+  sanitizeRequest(mock: CreateMockApiDto) {
     mock.path = mock.path.trim();
     mock.project = mock?.project ? mock.project.trim() : 'KP';
     return mock;
@@ -89,19 +114,18 @@ export class MockService implements OnModuleInit {
       await this.saveToFile();
       return true;
     }
-    return false;
+    throw new BadRequestException('Mock API not found!');
   }
 
   async appendResponse(appendResponse: AppendResponseDto) {
     const index = this.mocks.findIndex((m) => m.path === appendResponse.apiPath && appendResponse.project === m.project);
-    if (index < 0) return 'Mock API Not Found!';
+    if (index < 0) throw new BadRequestException('Mock API not found!');
 
     let api = this.mocks[index];
     api.responses.push(appendResponse.newResponse);
     this.mocks[index] = api;
     await this.saveToFile();
     return api;
-
   }
 
   async mockRouteExists(path, method, project = 'KP'): Promise<boolean> {

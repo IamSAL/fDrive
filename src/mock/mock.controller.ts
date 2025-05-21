@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { MockService } from './services/mock.service';
-import { MockEndpoint, MockEndpointPath } from './mock.entity';
+import { MockEndpoint } from './mock.entity';
 import {
   ApiTags,
   ApiOperation,
@@ -8,9 +8,14 @@ import {
   ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
-import { AppendResponseDto, GetMockListQuery } from './dto/mock-list.dto';
+import {
+  AppendResponseDto, CreateMockApiDto,
+  GetMockListQuery,
+  MockEndpointPathResponseDto,
+  UpdateMockRequestDto,
+} from './dto/mock.dto';
 
-@ApiTags('Mock APIs')
+@ApiTags('Mock Management APIs')
 @Controller('mock')
 export class MockController {
   constructor(private readonly mockService: MockService) {}
@@ -22,26 +27,41 @@ export class MockController {
     description: 'Mock API created',
     type: MockEndpoint,
   })
-  @ApiBody({ type: MockEndpoint })
-  async createMock(@Body() mock: Omit<MockEndpoint, 'id'>) {
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiBody({ type: CreateMockApiDto })
+  async createMock(@Body() mock: CreateMockApiDto) {
     return await this.mockService.create(mock);
   }
 
+  @Put()
+  @ApiOperation({ summary: 'Update mock API' })
+  @ApiBody({ type: MockEndpoint })
+  @ApiResponse({
+    status: 200,
+    description: 'Mock API updated',
+    type: MockEndpoint,
+  })
+  @ApiBody({ type: UpdateMockRequestDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  async updateMock(@Body() mock: UpdateMockRequestDto) {
+    return this.mockService.update(mock);
+  }
 
-  @Post("append/response")
-  @ApiOperation({ summary: 'Append response to the mock API' })
+  @Post("add/response")
+  @ApiOperation({ summary: 'Append new responses to the existing mock API' })
   @ApiResponse({
     status: 200,
     description: 'Append response to the mock API',
     type: MockEndpoint,
   })
   @ApiBody({ type: AppendResponseDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
   async appendResponse(@Body() request: AppendResponseDto) {
     return await this.mockService.appendResponse(request);
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all mock APIs with details' })
+  @ApiOperation({ summary: 'List all mock APIs' })
   @ApiResponse({
     status: 200,
     description: 'List of mock APIs',
@@ -56,28 +76,30 @@ export class MockController {
   @ApiResponse({
     status: 200,
     description: 'List all mock APIs Path Only',
-    type: [MockEndpointPath],
+    type: [MockEndpointPathResponseDto],
   })
   async listMockApiPath(@Query() query: GetMockListQuery) {
     return this.mockService.findAllPath(query.project);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Details of a mock API by ID' })
-  @ApiParam({ name: 'id', description: 'Details of a mock API by ID' })
+  @ApiOperation({ summary: 'Details of a mock API by Id' })
+  @ApiParam({ name: 'id', description: 'Details of a mock API by Id' })
   @ApiResponse({
     status: 200,
     description: 'Mock API Details by ID',
     type: [MockEndpoint],
   })
+  @ApiResponse({ status: 400, description: 'Validation error' })
   async getMockApiDetails(@Param('id') id: string) {
     return this.mockService.findById(id);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a mock API by ID' })
+  @ApiOperation({ summary: 'Delete a mock API by Id' })
   @ApiParam({ name: 'id', description: 'Mock ID to delete' })
   @ApiResponse({ status: 200, description: 'Mock deleted (true/false)' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
   async deleteMock(@Param('id') id: string) {
     return await this.mockService.delete(id);
   }
