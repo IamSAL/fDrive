@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MockEndpoint, MockResponse } from '../types/api';
+import { MockEndpoint, MockResponse } from '../types/dto';
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from './ui/Dialog';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';

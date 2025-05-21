@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { MockEndpoint } from '../types/api';
+import { MockEndpoint } from '../types/dto';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -10,7 +10,7 @@ export function isDevelopmentMode() {
   return typeof window !== 'undefined' && window.location.hostname === 'localhost';
 }
 
-  export const getCurlCommand = (endpoint: MockEndpoint, response: import('../types/api').MockResponse) => {
+  export const getCurlCommand = (endpoint: MockEndpoint, response: import('../types/dto').MockResponse) => {
     const url = `${localStorage.getItem('baseUrl')}${endpoint.path}`;
     let cmd = `curl -X ${endpoint.method} '${url}'`;
     if (response.request && Object.keys(response.request).length > 0) {

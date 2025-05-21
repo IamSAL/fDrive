@@ -1,4 +1,4 @@
-import { AppendResponseDto, MockEndpoint, Project } from '../types/api';
+import { AppendResponseDto, MockEndpoint, Project } from '../types/dto';
 
 const API_BASE_URL =
   localStorage.getItem("baseUrl") || window.location.href.includes('localhost')? 'http://localhost:3000' : "http://10.30.210.153:10399";

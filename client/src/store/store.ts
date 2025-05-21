@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { MockEndpoint } from '../types/api';
+import { MockEndpoint } from '../types/dto';
 
 interface Client {
   id: string;

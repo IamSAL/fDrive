@@ -1,4 +1,4 @@
-import { MockEndpoint, MockResponse, HttpMethod } from '../types/api';
+import { MockEndpoint, MockResponse, HttpMethod } from '../types/dto';
 import { SwaggerDefinition } from '../types/swagger';
 
 interface PathItemObject {

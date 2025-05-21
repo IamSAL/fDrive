@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Play, ChevronRight, ChevronDown, FileOutput, Clipboard } from 'lucide-react';
 import { useAppStore } from '../store/store';
-import { MockEndpoint } from '../types/api';
+import { MockEndpoint } from '../types/dto';
 import { apiService } from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Button } from './ui/Button';

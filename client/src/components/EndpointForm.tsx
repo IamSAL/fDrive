@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
-import { MockEndpoint, MockResponse, HttpMethod } from '../types/api';
+import { MockEndpoint, MockResponse, HttpMethod } from '../types/dto';
 import { useAppStore } from '../store/store';
 import { apiService } from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';

@@ -5,7 +5,7 @@ import { useAppStore } from '../store/store';
 import { apiService } from '../services/api';
 import { EndpointForm } from '../components/EndpointForm';
 import { Button } from '../components/ui/Button';
-import { MockEndpoint } from '../types/api';
+import { MockEndpoint } from '../types/dto';
 import toast from 'react-hot-toast';
 
 export const EditEndpoint: React.FC = () => {
