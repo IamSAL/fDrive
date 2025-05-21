@@ -28,7 +28,8 @@ export const TestModal: React.FC<TestModalProps> = ({
 }) => {
   const responseOptions = endpoint.responses.map((response, index) => ({
     value: index.toString(),
-    label: `Response ${index + 1} (${response.statusCode})`
+    label: response.name ? `${response.name} (${response.statusCode})` : `Response ${index + 1} (${response.statusCode})`,
+    description: response.description
   }));
   const [selectedResponse, setSelectedResponse] = useState<MockResponse | null>(endpoint.responses[0] ||  null);
   const [customRequest, setCustomRequest] = useState('');
@@ -53,23 +54,17 @@ export const TestModal: React.FC<TestModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} >
-      <DialogContent className="sm:max-w-[90vw]  ">
-        <DialogHeader className='dark:text-gray-100'>
+      <DialogContent className="sm:max-w-[90vw] max-w-full w-full max-h-[90vh] p-0 flex flex-col overflow-hidden">
+        <DialogHeader className='dark:text-gray-100 px-6 pt-6'>
           <DialogTitle >Test Endpoint: {endpoint.path}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
-         
-
+        <div className="flex-1 overflow-y-auto px-6 pb-2 space-y-4">
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              
               <Select
-                label="Select Request"
-                options={[
-                  ...responseOptions,
-                  // { value: 'custom', label: 'Custom Request' }
-                ]}
+                label="Select Response"
+                options={responseOptions}
                 value={isCustomRequest ? 'custom' : selectedResponse ? responseOptions.find(opt =>
                   opt.value === endpoint.responses.indexOf(selectedResponse).toString()
                 )?.value : ''}
@@ -84,23 +79,33 @@ export const TestModal: React.FC<TestModalProps> = ({
                   }
                 }}
               />
+              {selectedResponse && (selectedResponse.name || selectedResponse.description) && (
+                <div className="mt-2">
+                  {selectedResponse.name && <div className="font-semibold text-sm">{selectedResponse.name}</div>}
+                  {selectedResponse.description && <div className="text-xs text-gray-500 dark:text-gray-400">{selectedResponse.description}</div>}
+                </div>
+              )}
             </div>
 
             {
               isCustomRequest ?<div className="space-y-2">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Request JSON:</label>
-                <JsonEditor
-                  value={customRequest}
-                  onChange={setCustomRequest}
-                  height="100px"
-                />
+                <div className="min-h-[100px] max-h-[200px] h-[20vh]">
+                  <JsonEditor
+                    value={customRequest}
+                    onChange={setCustomRequest}
+                    height="100px"
+                  />
+                </div>
               </div> : <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Request JSON:</label>
-                <JsonEditor
-                    value={JSON.stringify(selectedResponse?.request, null, 2)}
-                  onChange={setCustomRequest}
-                  height="100px"
-                />
+                <div className="min-h-[100px] max-h-[200px] h-[20vh]">
+                  <JsonEditor
+                      value={JSON.stringify(selectedResponse?.request, null, 2)}
+                    onChange={setCustomRequest}
+                    height="100px"
+                  />
+                </div>
               </div>
             }
           </div>
@@ -116,40 +121,36 @@ export const TestModal: React.FC<TestModalProps> = ({
                 {Object.keys(testResult.headers).length > 0 && (
                   <div className="space-y-1">
                     <span className="text-sm font-medium">Headers:</span>
-                    <pre className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-x-auto">
-                     
+                    <div className="min-h-[60px] max-h-[120px] h-[12vh]">
                       <JsonEditor
                         value={JSON.stringify(testResult.headers, null, 2)}
                         onChange={() => {
                           
                         }}
-                        height="220px"
+                        height="100px"
                       />
-                     
-                    </pre>
+                    </div>
                   </div>
                 )}
                 
                 <div className="space-y-1">
                   <span className="text-sm font-medium">Body:</span>
-                  <pre className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-x-auto">
-                  
-
+                  <div className="min-h-[120px] max-h-[300px] h-[28vh]">
                     <JsonEditor
                       value={ JSON.stringify(testResult.data, null, 2) }
                       onChange={() => {
 
                       }}
-                      height="450px"
+                      height="100px"
                     />
-                  </pre>
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        <div className="flex justify-end space-x-2 mt-4">
+        <div className="flex justify-end space-x-2 px-6 pb-6 pt-2 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
           <Button variant="outline" className='dark:text-gray-100' onClick={onClose}>Cancel</Button>
           <Button onClick={handleTest}>Test Endpoint</Button>
         </div>

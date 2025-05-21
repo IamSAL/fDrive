@@ -3,6 +3,8 @@
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export interface MockResponse {
+  name?: string;
+  description?: string;
   request?: Record<string, any>;
   responseHeader?: Record<string, any>;
   response: Record<string, any>;

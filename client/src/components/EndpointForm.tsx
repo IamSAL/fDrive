@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
-import { MockEndpoint, MockResponse, HttpMethod } from '../types/dto';
+import { MockEndpoint, MockResponse } from '../types/dto';
 import { useAppStore } from '../store/store';
 import { apiService } from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
@@ -11,6 +11,7 @@ import { Select } from './ui/Select';
 import { Button } from './ui/Button';
 import { ResponseForm } from './ResponseForm';
 import toast from 'react-hot-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 interface EndpointFormProps {
   initialData?: MockEndpoint;
@@ -24,14 +25,16 @@ export const EndpointForm: React.FC<EndpointFormProps> = ({
   const navigate = useNavigate();
   const { addMockEndpoint, updateMockEndpoint, currentProject } = useAppStore();
   
-  const [responses, setResponses] = useState<MockResponse[]>(
-    initialData?.responses || [{
+  const [responses, setResponses] = useState<({ _tempId: string } & MockResponse)[]>(
+    (initialData?.responses || [{
+      name: '',
+      description: '',
       request: {},
       responseHeader: {},
       response: { message: "Success" },
       statusCode: 200,
       delay: 0
-    }]
+    }]).map(r => ({ ...r, _tempId: uuidv4() }))
   );
   
   const { control, handleSubmit, formState: { errors } } = useForm<Omit<MockEndpoint, 'responses'>>({
@@ -44,20 +47,25 @@ export const EndpointForm: React.FC<EndpointFormProps> = ({
   });
   
   const handleSaveResponse = (index: number, response: MockResponse) => {
-    console.log("save")
     const newResponses = [...responses];
-    newResponses[index] = response;
+    newResponses[index] = { ...response, _tempId: newResponses[index]._tempId };
     setResponses(newResponses);
   };
   
   const handleAddResponse = () => {
-    setResponses([...responses, {
-      request: {},
-      responseHeader: {},
-      response: { message: "Success" },
-      statusCode: 200,
-      delay: 0
-    }]);
+    setResponses([
+      ...responses,
+      {
+        name: '',
+        description: '',
+        request: {},
+        responseHeader: {},
+        response: { message: "Success" },
+        statusCode: 200,
+        delay: 0,
+        _tempId: uuidv4()
+      }
+    ]);
   };
   
   const handleDeleteResponse = (index: number) => {
@@ -79,7 +87,7 @@ export const EndpointForm: React.FC<EndpointFormProps> = ({
     
     const endpoint: MockEndpoint = {
       ...data,
-      responses
+      responses: responses.map(r => { const { _tempId, ...rest } = r; return rest; })
     };
     
     try {
@@ -181,8 +189,8 @@ export const EndpointForm: React.FC<EndpointFormProps> = ({
             </div>
             
             {responses.map((response, index) => (
-              <div key={index} className="mb-4">
-                <h4 className="text-sm font-medium mb-2">Response {index + 1}</h4>
+              <div key={response._tempId} className="mb-4">
+                <h4 className="text-sm font-medium mb-2"> {response.name || `Response ${index + 1}` }</h4>
                 <ResponseForm
                   initialResponse={response}
                   onSave={(updatedResponse) => handleSaveResponse(index, updatedResponse)}
@@ -190,6 +198,14 @@ export const EndpointForm: React.FC<EndpointFormProps> = ({
                 />
               </div>
             ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddResponse}
+              leftIcon={<PlusCircle className="w-4 h-4" />}
+            >
+              Add Response
+            </Button>
           </div>
           
           <div className="flex justify-end space-x-2">

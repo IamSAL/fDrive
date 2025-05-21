@@ -2,6 +2,16 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class MockResponse {
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ required: false, example: 'Success 200', description: 'Name for this response' })
+  name?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ required: false, example: 'This response is returned when the request is valid', description: 'Description for this response' })
+  description?: string;
+
   @IsObject()
   @IsNotEmpty()
   @ApiProperty({ required: true, example: {

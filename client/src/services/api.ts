@@ -1,3 +1,4 @@
+import { getAppState } from '../store/store';
 import { AppendResponseDto, MockEndpoint, Project } from '../types/dto';
 
 const API_BASE_URL =
@@ -116,11 +117,13 @@ export const apiService = {
   // Call a mock API to test it
   callMockApi: async (baseUrl: string, path: string, method: string, body?: any): Promise<any> => {
     console.log({ body });
+    const project = getAppState().currentProject;
     let url = `${baseUrl}${path}`;
     const options: RequestInit = {
       method,
       headers: {
         'Content-Type': 'application/json',
+        'project-name':project
       },
     };
 

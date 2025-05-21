@@ -290,10 +290,12 @@ export const EndpointList: React.FC = () => {
           {expandedEndpoints[endpoint.id!] && (
             <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
               <div className="text-sm text-gray-600 dark:text-gray-300">
-                <h4 className="font-medium mb-2">Responses ({endpoint.responses.length})</h4>
+               
                 {endpoint.responses.map((response, index) => (
                   <div key={index} className="mb-4 p-3 bg-white dark:bg-gray-900 rounded shadow-sm">
-                    <div className="flex justify-between items-center mb-2">
+                    <h4 className="text-sm font-medium mb-2"> {index + 1}. {response.name || `Response ${index + 1}`}</h4>
+                    <p className='px-2 pb-4 text-xs overflow-x-auto text-xs text-secondary-foreground opacity-50'>{ response.description}</p>
+                    <div className="flex justify-between items-center mb-2 bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs overflow-x-auto">
                       <div className="font-mono text-xs">
                         Status: <span className="text-blue-600">{response.statusCode}</span>
                         {response.delay > 0 && (

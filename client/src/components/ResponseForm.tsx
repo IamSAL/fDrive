@@ -42,6 +42,8 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
     delay: defaultResponse.delay
   });
 
+  const [name, setName] = useState(defaultResponse.name || '');
+  const [description, setDescription] = useState(defaultResponse.description || '');
   const [requestJson, setRequestJson] = useState(originalRef.current.request);
   const [responseHeaderJson, setResponseHeaderJson] = useState(originalRef.current.responseHeader);
   const [responseJson, setResponseJson] = useState(originalRef.current.response);
@@ -61,6 +63,8 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
 
   // Check if any field is dirty compared to original
   const isDirty =
+    name !== (defaultResponse.name || '') ||
+    description !== (defaultResponse.description || '') ||
     requestJson !== originalRef.current.request ||
     responseHeaderJson !== originalRef.current.responseHeader ||
     responseJson !== originalRef.current.response ||
@@ -76,6 +80,8 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
       isDirty
     ) {
       const formattedResponse: MockResponse = {
+        name: name || undefined,
+        description: description || undefined,
         request: requestJson ? JSON.parse(requestJson) : {},
         responseHeader: responseHeaderJson ? JSON.parse(responseHeaderJson) : {},
         response: responseJson ? JSON.parse(responseJson) : {},
@@ -93,10 +99,12 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestJson, responseHeaderJson, responseJson, statusCode, delay]);
+  }, [name, description, requestJson, responseHeaderJson, responseJson, statusCode, delay]);
 
   // Reset handler
   const handleReset = () => {
+    setName(defaultResponse.name || '');
+    setDescription(defaultResponse.description || '');
     setRequestJson(originalRef.current.request);
     setResponseHeaderJson(originalRef.current.responseHeader);
     setResponseJson(originalRef.current.response);
@@ -108,6 +116,20 @@ export const ResponseForm: React.FC<ResponseFormProps> = ({
     <Card className="mb-6">
       <CardContent className="p-4">
         <form onSubmit={e => e.preventDefault()}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <Input
+              label="Response Name"
+              placeholder="e.g. Success 200"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+            <Input
+              label="Description"
+              placeholder="Describe this response..."
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <Controller
               name="statusCode"

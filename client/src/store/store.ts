@@ -143,3 +143,8 @@ export const useAppStore = create<AppState>()(
     }
   )
 );
+
+// Utility to get the current Zustand store state without using the hook
+export function getAppState(): AppState {
+  return useAppStore.getState();
+}
